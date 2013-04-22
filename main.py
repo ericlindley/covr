@@ -123,9 +123,9 @@ def make_embed_url(url):
 
 # Helper function to instantiate tag and tagmap, given a new
 # video for the database.
-def create_tagmap(vid):
+def create_tagmap(vid, tags):
 	existing_tags = [tag.name for tag in Tag.all()]
-	all_tags = vid.tags
+	all_tags = tags
 	for single_tag in all_tags:
 		tagmap = Tagmap()
 		tagmap.vid_id = vid.key()
@@ -215,7 +215,7 @@ class AddHandler(webapp2.RequestHandler):
 			vid.author = users.get_current_user().nickname()
 			vid.put()
 			if all_tags:
-				create_tagmap(vid)
+				create_tagmap(vid, all_tags)
 		self.redirect('/?m=add')
 
 		##  eventually just make an ajax call that returns "success" or not.
@@ -228,10 +228,21 @@ class AddHandler(webapp2.RequestHandler):
 class TagHandler(webapp2.RequestHandler):
 	def post(self):
 		## SECURITY / EFFICIENCY / ERRORHANDLING / TIMEOUT ETC CONSIDERATIONS
+		url = self.request.get('url')
+		orig_tags = split_tags(clean_tags(self.request.get('orig_tags')))
+		cover_tags = split_tags(clean_tags(self.request.get('cover_tags')))
 
-		self.request.get('new tags for existing video')
+		all_tags = [tag+"_o" for tag in orig_tags] + [tag+"_c" for tag in cover_tags]
 
-		self.response.write('Success (or failure) and updated tags (fake it) ?')
+		vid = Vid.all().filter('url =', url).fetch(1)[0]
+		old_tags = vid.tags
+		new_tags = ([tag for tag in all_tags if tag not in old_tags])
+		vid.tags += new_tags
+		vid.put()
+		if new_tags:
+			create_tagmap(vid, new_tags)
+
+		self.response.write("Success!")
 
 class HintHandler(webapp2.RequestHandler):
 	def post(self):

@@ -1,4 +1,4 @@
-<html>
+	<html>
 	<head>
 	    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
 	    <link href='http://fonts.googleapis.com/css?family=Ultra' rel='stylesheet' type='text/css'>
@@ -6,6 +6,8 @@
 	</head>
 	<body>
 		<!-- ((((((((((((((((((((((((((((((((( NAVIGATION PANEL ))))))))))))))))))))))))))))))))) -->
+		<div id="black_panel">
+		</div>
 		<div id="navigation_panel">
 			<h1 id="title">COVR</h1>
 			<hr />
@@ -17,17 +19,17 @@
 
 				<div class="appearing_div" id="search_div">
 					<form id="advanced_search" action="/" method="get" enctype="multipart/form-data">
-						<div id="orig_search_wrapper" class="suggestion_box">
+						<div id="orig_search_wrapper" class="margin_correct suggestion_box">
 							<textarea id="search_orig" rows="1" maxlength="60" name="orig_search" placeholder="Search by Original Tags (ex. halleluja)"></textarea>
 							<ul id="orig_search_list" class="auto-list">
 							</ul>
 						</div>
-						<div id="cover_search_wrapper" class="suggestion_box">
+						<div id="cover_search_wrapper" class="margin_correct suggestion_box">
 							<textarea id="search_cover" rows="1" maxlength="60" name="cover_search" placeholder="Search by Cover Tags (ex. mournful, sweet)"></textarea>
 							<ul id="cover_search_list" class="auto-list">
 							</ul>
 						</div>
-						<input class="submit_button" type="submit" value="Search">
+						<input class="margin_correct submit_button" type="submit" value="Search">
 					</form>
 				</div>
 
@@ -37,12 +39,12 @@
 				<!-- iframe get url: document.getElementById("iframe_id").contentWindow.location.href -->
 				<div class="appearing_div" id="add_div">
 					<form id="add" action="/add" method="post" endtype="multipart/form-data">
-						<div id="orig_add_wrapper" class="suggestion_box">
+						<div id="orig_add_wrapper" class="margin_correct suggestion_box">
 							<textarea id="add_orig" rows="1" name="orig_tags" maxlength="60" placeholder="Tags for Original Song (ex. eleanor rigby, beatles, sad, strings)"></textarea>
 							<ul id="orig_add_list" class="auto-list">
 							</ul>
 						</div>
-						<div id="cover_add_wrapper" class="suggestion_box">
+						<div id="cover_add_wrapper" class="margin_correct suggestion_box">
 							<textarea id="add_cover" rows="1" name="cover_tags" maxlength="60" placeholder="Tags for Cover Song (ex. aretha franklin, soul, energetic)"></textarea>
 							<ul id="cover_add_list" class="auto-list">
 							</ul>
@@ -50,7 +52,7 @@
 						<textarea id="add_url" rows="1" name="url" maxlength="150" placeholder="URL for song (ex. https://www.youtube.com/watch?v=d-xSxWX7_-4)"></textarea>
 						<ul class="auto-list">
 						</ul>
-						<input id="add_button" class="submit_button" type="submit" value="Upload This Video">
+						<input id="add_button" class="margin_correct submit_button" type="submit" value="Upload This Video">
 					</form>
 				</div>
 			<!-- ((((((((((((((((((((((((((((((((( END ADDING REGION ))))))))))))))))))))))))))))))))) -->
@@ -66,19 +68,32 @@
 			<div id="all_vids">
 				{% for vid in vids %}
 				<div class="vid relative">
-					<iframe class="vid" width="560" height="315" src="{{vid.url}}" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>
-					<div class='tag_icon_container'>
-						<h6>+</h6>
+					<iframe class="vid" style="z-index:10;" onmouseover='$("#tag_icon{{ loop.index }}").css({"height":"80"})' onmouseout='$("#tag_icon{{ loop.index }}").css({"height":"0"})' width="560" height="315" src="{{vid.url}}" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>
+					<div class="tag_icon_container" onmouseover='$("#tag_icon{{ loop.index }}").css({"height":"80", "width":"100px"})' onmouseout='$("#tag_icon{{ loop.index }}").css({"height":"0"})'>
+						<h6 id="tag_icon{{ loop.index }}" class="tag_icon_text">+</h6>
+					</div>
+					<div>
+						<div class="appearing_div" id="tag_div{{ loop.index }}">
+							<form class="tag_form tag_div" id="tag_form{{ loop.index }}" action="/tag" method="post" enctype="multipart/form-data">
+								<textarea id="tag_url{{ loop.index }}" class="hidden" name="url" rows="1" cols="20" >{{vid.url}}</textarea>
+								<div id="orig_tag_wrapper{{ loop.index }}" class="suggestion_box">
+									<textarea id="orig_tags{{ loop.index }}" name="orig_tags" rows="1" cols="50" placeholder="Tags for Original Song (ex. John Cale, Paris 1919)"></textarea>
+									<ul id="orig_tag_list{{ loop.index }}" class="auto-list add_auto-list">
+									</ul>
+								</div>
+								<div id="cover_tag_wrapper{{ loop.index }}" class="suggestion_box">
+									<textarea id="cover_tags{{ loop.index }}" name="cover_tags" rows="1" cols="50" placeholder="Tags for Cover Song (ex. Owen Pallett, Live)"></textarea>
+									<ul id="cover_tag_list{{ loop.index }}" class="auto-list add_auto-list">
+									</ul>
+								</div>
+								<input id="tag_button{{ loop.index }}" class="submit_button tag_button" type="submit" value="Add These Tags">
+								<div class="tag_close_container">
+									<p id="close_button{{ loop.index }}" onclick="$('#tag_div{{ loop.index }}').css({'height' : '0px'});$('#tag_icon{{ loop.index }}').html('+');tagout{{ loop.index}} = 0;" class="tag_close_button">Close</p>
+								</div>
+							</form>
+						</div>
 					</div>
 				</div>
-				<!-- PUT THIS IN LATER
-				<div>
-					<form action="/tag" method="post" enctype="multipart/form-data">
-							<textarea class="hidden" name="gif_id" rows="1" cols="20">{{main_gif_key}}</textarea>
-							<textarea id="tag_form" name="tags" rows="1" cols="50" placeholder="Add tags (ex. beautiful, worthwhile, motivating)" onkeydown="if (event.keyCode == 13) { this.form.submit(); return false; }"></textarea>
-					</form>
-				</div>
-				-->
 				{% endfor %}
 			</div>
 			<div class="vid" id="end">
@@ -99,9 +114,13 @@
 
 			if (display_width > 800) {
 				vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
+				$('.tag_form').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_form').width()/2)});
+				$('.tag_icon_container').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_icon_container').width()/2)});
 			}
 			else {
 				vid_var.css({'width': display_width,'height': display_width*(9/16)});
+				$('.tag_form').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_form').width()/2)});
+				$('.tag_icon_container').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_icon_container').width()/2)});
 			};
 			window_var.resize(function() {
 				var vid_var = $('.vid');
@@ -109,9 +128,13 @@
 				display_var.css('width', display_width);
 				if (display_width > 800) {
 					vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
+					$('.tag_form').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_form').width()/2)});
+					$('.tag_icon_container').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_icon_container').width()/2)});
 				}
 				else {
 					vid_var.css({'width': display_width,'height': display_width*(9/16)});
+					$('.tag_form').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_form').width()/2)});
+					$('.tag_icon_container').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_icon_container').width()/2)});
 				};
 			});
 
@@ -193,6 +216,11 @@
 
 			hint_clear('.appearing_div');
 
+			/*
+			{% for vid in vids %}
+			hint_clear('#tag_form{{ loop.index }}');
+			{% endfor %}
+			*/
 
 			function trim_whitespace (str) {
 			    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
@@ -290,6 +318,43 @@
 
 			var mouse_moved = 0;
 
+
+			{% for vid in vids %}
+			var tag_form_id = $('#tag_form{{ loop.index }}');
+			var orig_tag_wrapper_id = $('#orig_tag_wrapper{{ loop.index }}');
+			var orig_tag_textarea_id = $('#orig_tags{{ loop.index }}');
+			var orig_tag_list_id = $('#orig_tag_list{{ loop.index }}');
+			var orig_tag_textarea_plain_id = "$('#orig_tags{{ loop.index }}')";
+
+			var cover_tag_wrapper_id = $('#cover_tag_wrapper{{ loop.index }}');
+			var cover_tag_textarea_id = $('#cover_tags{{ loop.index }}');
+			var cover_tag_list_id = $('#cover_tag_list{{ loop.index }}');
+			var cover_tag_textarea_plain_id = "$('#cover_tags{{ loop.index }}')";
+			
+			hint_keypress_mechanic(tag_form_id, orig_tag_wrapper_id, orig_tag_textarea_id, orig_tag_list_id, orig_tag_textarea_plain_id);
+			hint_keypress_mechanic(tag_form_id, cover_tag_wrapper_id, cover_tag_textarea_id, cover_tag_list_id, cover_tag_textarea_plain_id);
+
+			var tagout{{ loop.index }} = 0;
+
+
+			$('#tag_icon{{ loop.index }}').live('click',function() {
+				if (tagout{{ loop.index }} == 0) {
+					$('#tag_div{{ loop.index }}').css({'height' : '600px'});
+					$('#tag_icon{{ loop.index }}').html('-');
+					tagout{{ loop.index}} = 1;
+				}
+				else {
+					$('#tag_icon{{ loop.index }}').html('+');
+					tagout{{ loop.index}} = 0;
+					$('#tag_div{{ loop.index }}').css({'height' : '0px'});
+				}
+			})
+			{% endfor %}
+
+
+
+
+
 			// get jquery ids up front, put as parameters in function, to speed up.
 			// disable arrows sending queries, or any other accidental keys. this 
 			// is to minimize cost and computational expense
@@ -375,7 +440,6 @@
 				$('#hamburger').css({'height':'0px', 'display':'none'});
 			});
 
-
 			//This fades out the message passed in response to user actions.
 
 			setTimeout(function() {
@@ -391,6 +455,36 @@
 						nth = $(this).index();
 					},
 				});
+
+
+			{% for vid in vids %}
+			$('#tag_button{{ loop.index }}').click(function() {
+				var tag_url = $('#tag_url{{ loop.index }}').text();
+				var tag_orig_tags = $('#orig_tags{{ loop.index}}').val();
+				var tag_cover_tags = $('#cover_tags{{ loop.index}}').val();
+				$.ajax({
+					url: '/tag', 
+					type: 'POST',
+					data: {
+						url : tag_url,
+						orig_tags : tag_orig_tags,
+						cover_tags : tag_cover_tags
+					}
+				}).done(function(response) {
+					var json = response;
+					console.log(response);
+					/*if (json) {
+				    	obj = JSON && JSON.parse(json) || $.parseJSON(json);
+				    	for (var i = 0; i < obj.length; i++) {
+				    		console.log(obj[i]);
+				    	}
+				    }*/
+				});
+				return false;
+			})
+			{% endfor %}
+
+
 
 		</script>
 	</body>
