@@ -1,0 +1,397 @@
+<html>
+	<head>
+	    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+	    <link href='http://fonts.googleapis.com/css?family=Ultra' rel='stylesheet' type='text/css'>
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" type="text/javascript" ></script>
+	</head>
+	<body>
+		<!-- ((((((((((((((((((((((((((((((((( NAVIGATION PANEL ))))))))))))))))))))))))))))))))) -->
+		<div id="navigation_panel">
+			<h1 id="title">COVR</h1>
+			<hr />
+			<!-- ((((((((((((((((((((((((((((((((( SEARCH REGION ))))))))))))))))))))))))))))))))) -->
+			<div id="navigation_container">
+				<input class="display_button" id="search_display" type="button">
+				<input class="display_button" id="add_display" type="button" value="+">
+				<input class="display_button" id="hamburger" type="button" value="&#8592;">
+
+				<div class="appearing_div" id="search_div">
+					<form id="advanced_search" action="/" method="get" enctype="multipart/form-data">
+						<div id="orig_search_wrapper" class="suggestion_box">
+							<textarea id="search_orig" rows="1" maxlength="60" name="orig_search" placeholder="Search by Original Tags (ex. halleluja)"></textarea>
+							<ul id="orig_search_list" class="auto-list">
+							</ul>
+						</div>
+						<div id="cover_search_wrapper" class="suggestion_box">
+							<textarea id="search_cover" rows="1" maxlength="60" name="cover_search" placeholder="Search by Cover Tags (ex. mournful, sweet)"></textarea>
+							<ul id="cover_search_list" class="auto-list">
+							</ul>
+						</div>
+						<input class="submit_button" type="submit" value="Search">
+					</form>
+				</div>
+
+				<!-- ((((((((((((((((((((((((((((((((( END SEARCH REGION ))))))))))))))))))))))))))))))))) -->
+
+				<!-- ((((((((((((((((((((((((((((((((( ADDING REGION ))))))))))))))))))))))))))))))))) -->
+				<!-- iframe get url: document.getElementById("iframe_id").contentWindow.location.href -->
+				<div class="appearing_div" id="add_div">
+					<form id="add" action="/add" method="post" endtype="multipart/form-data">
+						<div id="orig_add_wrapper" class="suggestion_box">
+							<textarea id="add_orig" rows="1" name="orig_tags" maxlength="60" placeholder="Tags for Original Song (ex. eleanor rigby, beatles, sad, strings)"></textarea>
+							<ul id="orig_add_list" class="auto-list">
+							</ul>
+						</div>
+						<div id="cover_add_wrapper" class="suggestion_box">
+							<textarea id="add_cover" rows="1" name="cover_tags" maxlength="60" placeholder="Tags for Cover Song (ex. aretha franklin, soul, energetic)"></textarea>
+							<ul id="cover_add_list" class="auto-list">
+							</ul>
+						</div>
+						<textarea id="add_url" rows="1" name="url" maxlength="150" placeholder="URL for song (ex. https://www.youtube.com/watch?v=d-xSxWX7_-4)"></textarea>
+						<ul class="auto-list">
+						</ul>
+						<input id="add_button" class="submit_button" type="submit" value="Upload This Video">
+					</form>
+				</div>
+			<!-- ((((((((((((((((((((((((((((((((( END ADDING REGION ))))))))))))))))))))))))))))))))) -->
+			</div>
+		</div>
+		<!-- ((((((((((((((((((((((((((((((((( END NAVIGATION PANEL ))))))))))))))))))))))))))))))))) -->
+
+		<!-- ((((((((((((((((((((((((((((((((( DISPLAY AREA ))))))))))))))))))))))))))))))))) -->
+		<div id="display_case">
+			<div id="message_wrapper">
+				<h2>{{ message }}</h2>
+			</div>
+			<div id="all_vids">
+				{% for vid in vids %}
+				<div class="vid relative">
+					<iframe class="vid" width="560" height="315" src="{{vid.url}}" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>
+					<div class='tag_icon_container'>
+						<h6>+</h6>
+					</div>
+				</div>
+				<!-- PUT THIS IN LATER
+				<div>
+					<form action="/tag" method="post" enctype="multipart/form-data">
+							<textarea class="hidden" name="gif_id" rows="1" cols="20">{{main_gif_key}}</textarea>
+							<textarea id="tag_form" name="tags" rows="1" cols="50" placeholder="Add tags (ex. beautiful, worthwhile, motivating)" onkeydown="if (event.keyCode == 13) { this.form.submit(); return false; }"></textarea>
+					</form>
+				</div>
+				-->
+				{% endfor %}
+			</div>
+			<div class="vid" id="end">
+				<hr />
+			<div>
+		</div>
+		<!-- ((((((((((((((((((((((((((((((((( END DISPLAY AREA ))))))))))))))))))))))))))))))))) -->
+		<script type="text/javascript">
+
+			//	SET TIMEOUT ON ADD ICON, SO IT APPEARS AND BLINKS!
+
+			var window_var = $(window);
+			var display_width = window_var.width() - 300;
+			var vid_var = $('.vid');
+			var display_var = $('#display_case');
+
+			display_var.css('width', display_width);
+
+			if (display_width > 800) {
+				vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
+			}
+			else {
+				vid_var.css({'width': display_width,'height': display_width*(9/16)});
+			};
+			window_var.resize(function() {
+				var vid_var = $('.vid');
+				var display_width = window_var.width() - 300;
+				display_var.css('width', display_width);
+				if (display_width > 800) {
+					vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
+				}
+				else {
+					vid_var.css({'width': display_width,'height': display_width*(9/16)});
+				};
+			});
+
+			var end_var = $('#end');
+			var nav_var = $('#navigation_panel');
+			var ajax = 0;
+
+			var offset = 6;
+			var ajax_query = "{{ query }}";
+
+			window_var.scroll(function() {
+				var wind_top = window_var.scrollTop();
+				nav_var.css('top', wind_top);
+
+				if (window_var.scrollTop() + window_var.height() > end_var.offset().top + end_var.height()/2 && ajax == 0) {
+					ajax = 1;
+					$.ajax({
+						url: '/scroll', 
+						type: 'POST',
+						data: {
+							query: ajax_query,
+							offset: offset
+						}
+					}).done(function(response) {
+							offset = offset + 6;
+							var json = response;
+							obj = JSON && JSON.parse(json) || $.parseJSON(json);
+							var insertion = '';
+							for (var i = 0; i <= 6; i++) {
+								if (obj[i]) {
+									insertion += html_template(obj[String(i)][0], obj[String(i)][1]);
+								}
+							}
+							//  LOADING ICON ?
+							//  WAIT UNTIL FULLY LOADED TO INSERT? (PUT IN HIDDEN DIV THEN UNHIDE?)
+							$('#all_vids').append(insertion).each(function() {
+								var vid_var = $(this).find('.vid');
+								var display_width = window_var.width() - 300;
+								display_var.css('width', display_width);
+								if (display_width > 800) {
+									vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
+								}
+								else {
+									vid_var.css({'width': display_width,'height': display_width*(9/16)});
+								};
+							});
+							ajax = 0;  // MAKE THIS SOMEWHERE ELSE SO YOU CAN'T KEEP CALLING IT!
+					});
+				}
+			});
+
+			function html_template(url, tags) {
+				return '<div class="vid_container"><iframe class="vid" width="560" height="315" src="' + url +'" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe></div>';
+			}
+
+			function input_clicked_value(textarea_id, li_id) {
+				textarea_id.focus();
+				new_input = li_id.text();
+				existing_query = textarea_id.val();
+				last_comma = existing_query.lastIndexOf(",");
+				textarea_id.val(existing_query.slice(0, last_comma + 1) + ' ' + new_input);
+			}
+
+
+			function list_template(tag, index, textarea_plain_id) {
+				return '<li onmousedown="input_clicked_value(' + textarea_plain_id + ', $(this))">' + "<b>" + tag.slice(0, index) + "</b>" + tag.slice(index) + '</li>';
+			}
+
+			// This function ensures that clicking anywhere on the page
+			// will clear the hint list. namespace this!
+			function hint_clear(hint_container) {
+				$(hint_container + ' textarea').focusout(function () {
+					nth = -2;
+					setTimeout(function() {
+						$(hint_container + ' ul').html('');
+					}, 100);
+				});
+			}
+
+			hint_clear('.appearing_div');
+
+
+			function trim_whitespace (str) {
+			    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+			}
+
+			var partial_query = "";
+			var nth = -2;
+			var last_query_term;
+			var last_comma;
+
+			function hint(textarea_id, list_id, list_nth_child_id, textarea_plain_id) {
+				if (textarea_id.is(':focus')) {
+				    setTimeout(function() {
+				    	partial_query = trim_whitespace(textarea_id.val());
+				    	last_comma = partial_query.lastIndexOf(",");
+				    	if (last_comma != -1) {
+				    		last_query_term = trim_whitespace(partial_query.slice(last_comma + 1));
+				    	}
+				    	else {
+				    		last_query_term = partial_query;
+				    	}
+				    	var partial_query_length = last_query_term.length;
+					    if (partial_query_length > 0) {
+						    $.ajax({
+						    	url: '/hint', 
+						    	type: 'POST',
+						    	data: {
+						    		partial_query: partial_query
+						    	}
+						    }).done(function(response) {
+						    	var json = response;
+						    	var list_insert = "";
+						    	if (json) {
+							    	obj = JSON && JSON.parse(json) || $.parseJSON(json);
+							    	for (var i = 0; i < obj.length; i++) {
+							    		list_insert += list_template(obj[i], partial_query_length, textarea_plain_id);
+							    	}
+								   	list_id.html(list_insert);
+								   	nth = 0;
+								   	list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+								   	list_nth_child_id.css({'background-color':'#ddd'})
+							    }
+							    else {
+							    	nth = -2;
+							    	list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+							    	list_id.html("");
+							    }
+						    });
+						}
+						else {
+							nth = -2;
+							list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+							list_id.html("");
+						}
+					}, 1);
+				}
+				else {
+					nth = -2;
+					list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+					list_id.html("");
+				}
+			}
+
+
+			var search_form = $('#advanced_search');
+			var add_form = $('add');
+
+			var orig_search_wrapper = $('#orig_search_wrapper');
+			var cover_search_wrapper = $('#cover_search_wrapper');
+			var orig_add_wrapper = $('#orig_add_wrapper');
+			var cover_add_wrapper = $('#cover_add_wrapper');
+
+			var orig_search_textarea = $('#search_orig');
+			var cover_search_textarea = $('#search_cover');
+			var orig_add_textarea = $('#add_orig');
+			var cover_add_textarea = $('#add_cover');
+
+			var orig_search_list = $('#orig_search_list');
+			var cover_search_list = $('#cover_search_list');
+			var orig_add_list = $('#orig_add_list');
+			var cover_add_list = $('#cover_add_list');
+
+			var orig_search_textarea_plain_id = "$('#search_orig')";
+			var orig_search_list_plain_id = "$('#orig_search_list')";
+			var cover_search_textarea_plain_id = "$('#search_cover')";
+			var cover_search_list_plain_id = "$('#cover_search_list')";
+			var orig_add_textarea_plain_id = "$('#add_orig')";
+			var orig_add_list_plain_id = "$('#orig_add_list')";
+			var cover_add_textarea_plain_id = "$('#add_cover')";
+			var cover_add_list_plain_id = "$('#cover_add_list')";
+
+			var list_nth_child_id;
+			var new_input;
+
+
+			var mouse_moved = 0;
+
+			// get jquery ids up front, put as parameters in function, to speed up.
+			// disable arrows sending queries, or any other accidental keys. this 
+			// is to minimize cost and computational expense
+			function hint_keypress_mechanic(form_id, wrapper_id, textarea_id, list_id, textarea_plain_id) {
+				textarea_id.keydown(function(e) {
+					mouse_moved = 0;
+					console.log('mouse reset')
+
+					list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+					// ENTER
+				    if (e.keyCode == 13){
+				    	event.preventDefault();
+				    	if (nth == -2) {
+				    		form_id.submit();
+				    	}
+				    	else {
+				    		current_selection = list_nth_child_id.text();
+				    		textarea_id.val(partial_query.slice(0, last_comma + 1) + ' ' + current_selection);
+				    		list_id.html("");
+				    		nth = -2;
+				    		list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+				    	}
+				    }
+				    // TAB
+				    else if (e.keyCode == 9) {
+				    	setTimeout(function() {
+				        	list_id.html("");
+				        }, 50);
+				    }
+				    // LETTER OR ABOVE OR BACKSPACE
+				    else if (e.keyCode > 48 || e.keyCode == 8) {
+					    hint(textarea_id, list_id, list_nth_child_id, textarea_plain_id);
+					}
+					// UP ARROW
+					else if (e.keyCode == 38) {
+						event.preventDefault();
+						if (nth > 0) {
+							list_nth_child_id.css({'background-color':'white'});
+							nth -= 1;
+							list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+							list_nth_child_id.css({'background-color':'#ddd'});
+						}
+					}
+					// DOWN ARROW
+					else if (e.keyCode == 40) {
+						event.preventDefault();
+						if (nth < list_id.children().length - 1) {
+							list_nth_child_id.css({'background-color':'white'});
+							nth += 1;
+							list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+							list_nth_child_id.css({'background-color':'#ddd'});
+						}
+					}
+				});
+			}
+			
+
+			hint_keypress_mechanic(search_form, orig_search_wrapper, orig_search_textarea, orig_search_list, orig_search_textarea_plain_id);
+			hint_keypress_mechanic(search_form, cover_search_wrapper, cover_search_textarea, cover_search_list, cover_search_textarea_plain_id);
+			hint_keypress_mechanic(add_form, orig_add_wrapper, orig_add_textarea, orig_add_list, orig_add_textarea_plain_id);
+			hint_keypress_mechanic(add_form, cover_add_wrapper, cover_add_textarea, cover_add_list, cover_add_textarea_plain_id);
+
+			// This set of actions coordinates the hiding and showing of 
+			// the icons in the navigation bar.  This should be functionalized
+			// and properly namespaced.
+
+			$('#add_display').click(function() {
+				$('#add_div').css({'display':'block','height': '170px'});
+				$('.display_button').css('display', 'none');
+				$('#hamburger').css({'height':'170px', 'display':'block'});
+			});
+
+			$('#search_display').click(function() {
+				$('#search_div').css({'display':'block','height': '170px'});
+				$('.display_button').css('display', 'none');
+				$('#hamburger').css({'height':'170px', 'display':'block'});
+			});
+
+			$('#hamburger').click(function() {
+				$('#add_div').css({'display':'none', 'height':'0px'});
+				$('#search_div').css({'display':'none', 'height':'0px'});
+				$('.display_button').css('display', 'block');
+				$('#hamburger').css({'height':'0px', 'display':'none'});
+			});
+
+
+			//This fades out the message passed in response to user actions.
+
+			setTimeout(function() {
+				$('#message_wrapper').fadeOut(2000)
+			}, 3000);
+
+
+			$("li").live({
+				mouseenter:
+					function() {
+						$('li').css({'background-color': 'white'});
+						$(this).css({'background-color': '#ddd'});
+						nth = $(this).index();
+					},
+				});
+
+		</script>
+	</body>
+</html>
