@@ -188,11 +188,21 @@ class MainHandler(webapp2.RequestHandler):
 		if from_add:
 			message = """Your cover has been added!"""
 
+		############ Clean Up Tags #######################
+		tag_string_list = []
+		for vid in vids:
+			tag_string = ""
+			for tag in reversed(sorted(vid.tags, key=len)):
+				if tag[:-2] not in tag_string:
+					tag_string += tag[:-2] + " "
+			tag_string_list.append(tag_string)
+
 		############ To Pass to HTML Template #############
 		template_values = {
 			'vids': vids,
 			'message': message,
 			'query': query,
+			'tags': tag_string_list
 		}
 
 		############# Instantiate Template ######################

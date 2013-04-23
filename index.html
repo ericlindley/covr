@@ -54,6 +54,8 @@
 						</ul>
 						<input id="add_button" class="margin_correct submit_button" type="submit" value="Upload This Video">
 					</form>
+					<a  href="http://youtube.com" target="_blank"><button>Look on Youtube</button></a>
+					<a href="http://vimeo.com" target="_blank"><button>Look on Vimeo</button></a>
 				</div>
 			<!-- ((((((((((((((((((((((((((((((((( END ADDING REGION ))))))))))))))))))))))))))))))))) -->
 			</div>
@@ -68,13 +70,16 @@
 			<div id="all_vids">
 				{% for vid in vids %}
 				<div class="vid relative">
-					<iframe class="vid" style="z-index:10;" onmouseover='$("#tag_icon{{ loop.index }}").css({"height":"80"})' onmouseout='$("#tag_icon{{ loop.index }}").css({"height":"0"})' width="560" height="315" src="{{vid.url}}" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>
-					<div class="tag_icon_container" onmouseover='$("#tag_icon{{ loop.index }}").css({"height":"80", "width":"100px"})' onmouseout='$("#tag_icon{{ loop.index }}").css({"height":"0"})'>
+					<div id="tag_display{{ loop.index }}" class="tag_display">
+						<h2>{{ tags[loop.index - 1] }}</h2>
+					</div>
+					<iframe class="vid" style="z-index:10;" onmouseover='$("#tag_icon{{ loop.index }}").css({"height":"80", "border-left":"4px solid white", "border-right": "4px solid white", "border-bottom": "4px solid white"})' onmouseout='$("#tag_icon{{ loop.index }}").css({"height":"0", "border": "none"})' width="560" height="315" src="{{vid.url}}" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>
+					<div class="tag_icon_container" onmouseover='$("#tag_icon{{ loop.index }}").css({"height":"80", "width":"100px", "border-left":"4px solid white", "border-right": "4px solid white", "border-bottom": "4px solid white"})' onmouseout='$("#tag_icon{{ loop.index }}").css({"height":"0", "border": "none"})'>
 						<h6 id="tag_icon{{ loop.index }}" class="tag_icon_text">+</h6>
 					</div>
 					<div>
 						<div class="appearing_div" id="tag_div{{ loop.index }}">
-							<form class="tag_form tag_div" id="tag_form{{ loop.index }}" action="/tag" method="post" enctype="multipart/form-data">
+							<form class="tag_form tag_div" id="tag_form{{ loop.index }}">
 								<textarea id="tag_url{{ loop.index }}" class="hidden" name="url" rows="1" cols="20" >{{vid.url}}</textarea>
 								<div id="orig_tag_wrapper{{ loop.index }}" class="suggestion_box">
 									<textarea id="orig_tags{{ loop.index }}" name="orig_tags" rows="1" cols="50" placeholder="Tags for Original Song (ex. John Cale, Paris 1919)"></textarea>
@@ -88,7 +93,7 @@
 								</div>
 								<input id="tag_button{{ loop.index }}" class="submit_button tag_button" type="submit" value="Add These Tags">
 								<div class="tag_close_container">
-									<p id="close_button{{ loop.index }}" onclick="$('#tag_div{{ loop.index }}').css({'height' : '0px'});$('#tag_icon{{ loop.index }}').html('+');tagout{{ loop.index}} = 0;" class="tag_close_button">Close</p>
+									<p id="close_button{{ loop.index }}" onclick="$('#tag_div{{ loop.index }}').css({'height' : '0px'});$('#tag_icon{{ loop.index }}').html('+');tagout{{ loop.index}} = 0;$('.tag_display').fadeOut(100);$('iframe').css({'opacity':'1'});" class="tag_close_button">Close</p>
 								</div>
 							</form>
 						</div>
@@ -116,9 +121,11 @@
 				vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
 				$('.tag_form').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_form').width()/2)});
 				$('.tag_icon_container').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_icon_container').width()/2)});
+				$('.tag_display').css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
 			}
 			else {
 				vid_var.css({'width': display_width,'height': display_width*(9/16)});
+				$('.tag_display').css({'width': display_width,'height': display_width*(9/16)});
 				$('.tag_form').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_form').width()/2)});
 				$('.tag_icon_container').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_icon_container').width()/2)});
 			};
@@ -128,11 +135,13 @@
 				display_var.css('width', display_width);
 				if (display_width > 800) {
 					vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
+					$('.tag_display').css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
 					$('.tag_form').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_form').width()/2)});
 					$('.tag_icon_container').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_icon_container').width()/2)});
 				}
 				else {
 					vid_var.css({'width': display_width,'height': display_width*(9/16)});
+					$('.tag_display').css({'width': display_width,'height': display_width*(9/16)});
 					$('.tag_form').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_form').width()/2)});
 					$('.tag_icon_container').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_icon_container').width()/2)});
 				};
@@ -186,9 +195,39 @@
 				}
 			});
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 			function html_template(url, tags) {
 				return '<div class="vid_container"><iframe class="vid" width="560" height="315" src="' + url +'" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe></div>';
 			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 			function input_clicked_value(textarea_id, li_id) {
 				textarea_id.focus();
@@ -342,11 +381,15 @@
 					$('#tag_div{{ loop.index }}').css({'height' : '600px'});
 					$('#tag_icon{{ loop.index }}').html('-');
 					tagout{{ loop.index}} = 1;
+					$('.tag_display').fadeIn(100);
+					$('iframe').css({'opacity':'.2'});
 				}
 				else {
 					$('#tag_icon{{ loop.index }}').html('+');
 					tagout{{ loop.index}} = 0;
 					$('#tag_div{{ loop.index }}').css({'height' : '0px'});
+					$('.tag_display').fadeOut(100);
+					$('iframe').css({'opacity':'1'});
 				}
 			})
 			{% endfor %}
@@ -361,7 +404,6 @@
 			function hint_keypress_mechanic(form_id, wrapper_id, textarea_id, list_id, textarea_plain_id) {
 				textarea_id.keydown(function(e) {
 					mouse_moved = 0;
-					console.log('mouse reset')
 
 					list_nth_child_id = list_id.find('li:eq(' + nth + ')');
 					// ENTER
@@ -371,11 +413,13 @@
 				    		form_id.submit();
 				    	}
 				    	else {
-				    		current_selection = list_nth_child_id.text();
-				    		textarea_id.val(partial_query.slice(0, last_comma + 1) + ' ' + current_selection);
-				    		list_id.html("");
-				    		nth = -2;
-				    		list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+				    		if (list_nth_child_id.text().length > 0) {
+				    			current_selection = list_nth_child_id.text();
+				    			textarea_id.val(partial_query.slice(0, last_comma + 1) + ' ' + current_selection);
+				    			list_id.html("");
+				 		   		nth = -2;
+				    			list_nth_child_id = list_id.find('li:eq(' + nth + ')');
+				    		}
 				    	}
 				    }
 				    // TAB
@@ -422,7 +466,7 @@
 			// and properly namespaced.
 
 			$('#add_display').click(function() {
-				$('#add_div').css({'display':'block','height': '170px'});
+				$('#add_div').css({'display':'block','height': '250px'});
 				$('.display_button').css('display', 'none');
 				$('#hamburger').css({'height':'170px', 'display':'block'});
 			});
@@ -482,6 +526,32 @@
 				});
 				return false;
 			})
+
+			$('#tag_form{{ loop.index }}').submit(function() {
+				var tag_url = $('#tag_url{{ loop.index }}').text();
+				var tag_orig_tags = $('#orig_tags{{ loop.index}}').val();
+				var tag_cover_tags = $('#cover_tags{{ loop.index}}').val();
+				$.ajax({
+					url: '/tag', 
+					type: 'POST',
+					data: {
+						url : tag_url,
+						orig_tags : tag_orig_tags,
+						cover_tags : tag_cover_tags
+					}
+				}).done(function(response) {
+					var json = response;
+					console.log(response);
+					/*if (json) {
+				    	obj = JSON && JSON.parse(json) || $.parseJSON(json);
+				    	for (var i = 0; i < obj.length; i++) {
+				    		console.log(obj[i]);
+				    	}
+				    }*/
+				});
+				return false;
+			})
+
 			{% endfor %}
 
 
