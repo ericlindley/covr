@@ -236,19 +236,26 @@ class AddHandler(webapp2.RequestHandler):
 		## maybe suggest that video, and suggest that it's tags need changing?
 
 class TagHandler(webapp2.RequestHandler):
+	"""Takes an ajax request to update an existing video with new tags and responds
+		with success or failure."""
 	def post(self):
 		## SECURITY / EFFICIENCY / ERRORHANDLING / TIMEOUT ETC CONSIDERATIONS
+		# Get POSTed variables
 		url = self.request.get('url')
 		orig_tags = split_tags(clean_tags(self.request.get('orig_tags')))
 		cover_tags = split_tags(clean_tags(self.request.get('cover_tags')))
 
+		# add _o and _c from tags and concatenate them as a list
 		all_tags = [tag+"_o" for tag in orig_tags] + [tag+"_c" for tag in cover_tags]
 
+		# Index the video being updated and filter out the existing tags
+		# from the ones being uploaded.
 		vid = Vid.all().filter('url =', url).fetch(1)[0]
 		old_tags = vid.tags
 		new_tags = ([tag for tag in all_tags if tag not in old_tags])
 		vid.tags += new_tags
 		vid.put()
+		# if there are any new tags, make a new tagmap for them.
 		if new_tags:
 			create_tagmap(vid, new_tags)
 
@@ -271,22 +278,27 @@ class HintHandler(webapp2.RequestHandler):
 class ScrollHandler(webapp2.RequestHandler):
 	def post(self):
 		## SECURITY / EFFICIENCY / ERRORHANDLING / TIMEOUT ETC CONSIDERATIONS
-		## Also, should have already sent this database request for the next scroll. 
-		## so loading is instantaneous, then preloading happens for the next group
-		## while the user looks at the last one.
-		##  use cursors in the filters for this mechanic.
-
 		## IN DICTIONARY FORM, SO CAN FILTER OUT EMPTY BITS?
 		query = self.request.get('query')
 		offset = int(self.request.get('offset'))
 
 		new_vids = eval(query + '.fetch(limit = 6, offset = offset)')
 		vid_data = {}
+
 		for i, vid in enumerate(new_vids):
-			vid_data[i] = [vid.url, vid.tags]
+			tag_string = ""
+			for tag in reversed(sorted(vid.tags, key=len)):
+				if tag[:-2] not in tag_string:
+					tag_string += tag[:-2] + " "
+
+			vid_data[i] = [vid.url, tag_string]
 
 		response = json.dumps(vid_data, separators=(',',':'))
 		self.response.write(response)
+
+
+## use filtering algorithm that depends on users to find videos and interact with them
+## as the basis of their worth and the worth of the keywords used to find them.
 
 app = webapp2.WSGIApplication([
 								('/', MainHandler),

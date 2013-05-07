@@ -1,15 +1,16 @@
-	<html>
+<html>
 	<head>
 	    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
 	    <link href='http://fonts.googleapis.com/css?family=Ultra' rel='stylesheet' type='text/css'>
 	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" type="text/javascript" ></script>
+	    <script type="text/javascript" src="/stylesheets/main.js"></script>
 	</head>
 	<body>
 		<!-- ((((((((((((((((((((((((((((((((( NAVIGATION PANEL ))))))))))))))))))))))))))))))))) -->
 		<div id="black_panel">
 		</div>
 		<div id="navigation_panel">
-			<h1 id="title">COVR</h1>
+			<h1 id="title">NCOVR</h1>
 			<hr />
 			<!-- ((((((((((((((((((((((((((((((((( SEARCH REGION ))))))))))))))))))))))))))))))))) -->
 			<div id="navigation_container">
@@ -49,12 +50,13 @@
 							<ul id="cover_add_list" class="auto-list">
 							</ul>
 						</div>
-						<textarea id="add_url" rows="1" name="url" maxlength="150" placeholder="URL for song (ex. https://www.youtube.com/watch?v=d-xSxWX7_-4)"></textarea>
-						<ul class="auto-list">
-						</ul>
+						<div class="margin_correct relative">
+							<textarea id="add_url" rows="1" name="url" maxlength="150" placeholder="URL for song (ex. https://www.youtube.com/watch?v=d-xSxWX7_-4)"></textarea>
+						</div>
 						<input id="add_button" class="margin_correct submit_button" type="submit" value="Upload This Video">
 					</form>
 					<a  href="http://youtube.com" target="_blank"><button>Look on Youtube</button></a>
+					<br />
 					<a href="http://vimeo.com" target="_blank"><button>Look on Vimeo</button></a>
 				</div>
 			<!-- ((((((((((((((((((((((((((((((((( END ADDING REGION ))))))))))))))))))))))))))))))))) -->
@@ -73,8 +75,8 @@
 					<div id="tag_display{{ loop.index }}" class="tag_display">
 						<h2>{{ tags[loop.index - 1] }}</h2>
 					</div>
-					<iframe class="vid" style="z-index:10;" onmouseover='$("#tag_icon{{ loop.index }}").css({"height":"80", "border-left":"4px solid white", "border-right": "4px solid white", "border-bottom": "4px solid white"})' onmouseout='$("#tag_icon{{ loop.index }}").css({"height":"0", "border": "none"})' width="560" height="315" src="{{vid.url}}" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>
-					<div class="tag_icon_container" onmouseover='$("#tag_icon{{ loop.index }}").css({"height":"80", "width":"100px", "border-left":"4px solid white", "border-right": "4px solid white", "border-bottom": "4px solid white"})' onmouseout='$("#tag_icon{{ loop.index }}").css({"height":"0", "border": "none"})'>
+					<iframe class="vid" style="z-index:10;" onmouseover="vid_mouseover{{ loop.index }}();" onmouseout="vid_mouseout{{ loop.index }}()" width="560" height="315" src="{{vid.url}}" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>
+					<div class="tag_icon_container" onmouseover="tag_icon_mouseover{{ loop.index }}()" onmouseout="tag_icon_mouseout{{ loop.index }}()">
 						<h6 id="tag_icon{{ loop.index }}" class="tag_icon_text">+</h6>
 					</div>
 					<div>
@@ -93,7 +95,7 @@
 								</div>
 								<input id="tag_button{{ loop.index }}" class="submit_button tag_button" type="submit" value="Add These Tags">
 								<div class="tag_close_container">
-									<p id="close_button{{ loop.index }}" onclick="$('#tag_div{{ loop.index }}').css({'height' : '0px'});$('#tag_icon{{ loop.index }}').html('+');tagout{{ loop.index}} = 0;$('.tag_display').fadeOut(100);$('iframe').css({'opacity':'1'});" class="tag_close_button">Close</p>
+									<p id="close_button{{ loop.index }}" onclick="close_button_click{{ loop.index }}()" class="tag_close_button">Close</p>
 								</div>
 							</form>
 						</div>
@@ -106,46 +108,81 @@
 			<div>
 		</div>
 		<!-- ((((((((((((((((((((((((((((((((( END DISPLAY AREA ))))))))))))))))))))))))))))))))) -->
+
+
+
+
 		<script type="text/javascript">
 
-			//	SET TIMEOUT ON ADD ICON, SO IT APPEARS AND BLINKS!
+			// 	INITIALIZE SIZE AND POSITION OF ELEMENTS, AND RE-INITIALIZE ON WINDOW RESIZE
+			//  SHOULD BE DONE WITH NATIVE CODE (CSS) IF POSSIBLE.
 
-			var window_var = $(window);
-			var display_width = window_var.width() - 300;
-			var vid_var = $('.vid');
-			var display_var = $('#display_case');
+			window.window_var = $(window);
+			window.display_var = $('#display_case');
+			window.video_width;
+			window.video_height;
 
-			display_var.css('width', display_width);
+			// disable tag icon on tagout == 1
+			// disapear all tags on close (or increment 
+			// tagout so that all go back to no tags 
+			// only when they're all closed? (but 
+			// that's not great, because you don't want to))
+			// have to close everything when you watch a video
+			// maybe have to get rid of all tags when close one?
+			// but that's not great, either...  is there another way?
 
-			if (display_width > 800) {
-				vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
-				$('.tag_form').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_form').width()/2)});
-				$('.tag_icon_container').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_icon_container').width()/2)});
-				$('.tag_display').css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
-			}
-			else {
-				vid_var.css({'width': display_width,'height': display_width*(9/16)});
-				$('.tag_display').css({'width': display_width,'height': display_width*(9/16)});
-				$('.tag_form').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_form').width()/2)});
-				$('.tag_icon_container').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_icon_container').width()/2)});
-			};
-			window_var.resize(function() {
-				var vid_var = $('.vid');
-				var display_width = window_var.width() - 300;
-				display_var.css('width', display_width);
-				if (display_width > 800) {
-					vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
-					$('.tag_display').css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
-					$('.tag_form').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_form').width()/2)});
-					$('.tag_icon_container').css({'margin': String((display_width/2)*(9/16)) +' auto auto ' + String((display_width)/4-$('.tag_icon_container').width()/2)});
+			function set_elements_size_and_position() {
+				if (window.window_var.width() > 800) {
+					var display_width = window.window_var.width() - 300; // this will change when the window is too small.
+					$('.display_button').css({'width': '200px', 'height': '200px'});
+					$('#navigation_panel .appearing_div').css({'margin':'auto'});
 				}
 				else {
-					vid_var.css({'width': display_width,'height': display_width*(9/16)});
-					$('.tag_display').css({'width': display_width,'height': display_width*(9/16)});
-					$('.tag_form').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_form').width()/2)});
-					$('.tag_icon_container').css({'margin': String((display_width)*(9/16)) +' auto auto ' + String((display_width)/2-$('.tag_icon_container').width()/2)});
+					var display_width = window.window_var.width();
+					$('#navigation_panel .appearing_div').css({'margin': '0 0 0 ' + String($('#navigation_panel').width()/2 - $('#add_orig').width()/2)});
+					$('.display_button').css({'width': '40px', 'height': '40px'});
+				}
+				var vid_var = $('.vid');
+
+				window.display_var.css({
+					'width': display_width
+				});
+
+				if (display_width > 800) {
+					window.video_width = display_width/2;
+				}
+				else {
+					window.video_width = display_width;
 				};
+
+				window.video_height = window.video_width*(9/16);
+
+				vid_var.css({
+					'width': window.video_width,
+					'height': window.video_height
+				});
+
+				$('.tag_form').css({
+					'margin': String(window.video_height)/2 +' auto auto ' + String(window.video_width/2-$('#orig_tags1').width()/2)
+				});
+
+				$('.tag_icon_container').css({
+					'margin': 'auto auto auto ' + String(window.video_width/2-$('.tag_icon_container').width()/2)
+				});
+
+				$('.tag_display').css({
+					'width': window.video_width, 'height': window.video_height
+				});
+			}
+
+			set_elements_size_and_position();
+
+			window.window_var.resize(function() {
+				set_elements_size_and_position();
 			});
+
+
+
 
 			var end_var = $('#end');
 			var nav_var = $('#navigation_panel');
@@ -154,11 +191,11 @@
 			var offset = 6;
 			var ajax_query = "{{ query }}";
 
-			window_var.scroll(function() {
-				var wind_top = window_var.scrollTop();
+			window.window_var.scroll(function() {
+				var wind_top = window.window_var.scrollTop();
 				nav_var.css('top', wind_top);
 
-				if (window_var.scrollTop() + window_var.height() > end_var.offset().top + end_var.height()/2 && ajax == 0) {
+				if (window.window_var.scrollTop() + window.window_var.height() > end_var.offset().top + end_var.height()/2 && ajax == 0) {
 					ajax = 1;
 					$.ajax({
 						url: '/scroll', 
@@ -168,66 +205,152 @@
 							offset: offset
 						}
 					}).done(function(response) {
-							offset = offset + 6;
-							var json = response;
-							obj = JSON && JSON.parse(json) || $.parseJSON(json);
-							var insertion = '';
-							for (var i = 0; i <= 6; i++) {
-								if (obj[i]) {
-									insertion += html_template(obj[String(i)][0], obj[String(i)][1]);
-								}
+						var json = response;
+						var obj = JSON && JSON.parse(json) || $.parseJSON(json);
+						var insertion = '';
+						for (var i = 0; i <= 6; i++) {
+							if (obj[i]) {
+								insertion += html_template(obj[String(i)][0], obj[String(i)][1], i + offset + 1);
+								generate_new_tag_function(i + offset + 1);
 							}
-							//  LOADING ICON ?
-							//  WAIT UNTIL FULLY LOADED TO INSERT? (PUT IN HIDDEN DIV THEN UNHIDE?)
-							$('#all_vids').append(insertion).each(function() {
-								var vid_var = $(this).find('.vid');
-								var display_width = window_var.width() - 300;
-								display_var.css('width', display_width);
-								if (display_width > 800) {
-									vid_var.css({'width': (display_width)/2, 'height': (display_width/2)*(9/16)});
-								}
-								else {
-									vid_var.css({'width': display_width,'height': display_width*(9/16)});
-								};
-							});
-							ajax = 0;  // MAKE THIS SOMEWHERE ELSE SO YOU CAN'T KEEP CALLING IT!
+						}
+						//  LOADING ICON ?
+						//  WAIT UNTIL FULLY LOADED TO INSERT? (PUT IN HIDDEN DIV THEN UNHIDE?)
+						//  maybe just replace icon in the center of the end hr while it loads?
+						$('#all_vids').append(insertion).each(function() {
+							set_elements_size_and_position();
+						});
+						offset = offset + 6;
+						ajax = 0;  // MAKE THIS SOMEWHERE ELSE SO YOU CAN'T KEEP CALLING IT!
 					});
 				}
 			});
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-			function html_template(url, tags) {
-				return '<div class="vid_container"><iframe class="vid" width="560" height="315" src="' + url +'" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe></div>';
+			function html_template(url, tags, loopindex) {
+				return '<div class="vid relative">\
+				\	\	\	<div id="tag_display' + String(loopindex) + '" class="tag_display">\
+				\	\	\	\	<h2>' + tags + '</h2>\
+				\	\	\	</div>\
+				\	\	\	<iframe class="vid" style="z-index:10;" onmouseover="vid_mouseover' + String(loopindex) + '();" onmouseout="vid_mouseout' + String(loopindex) + '()" width="560" height="315" src="' + url + '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>\
+				\	\	\	<div class="tag_icon_container" onmouseover="tag_icon_mouseover' + String(loopindex) + '()" onmouseout="tag_icon_mouseout' + String(loopindex) + '()">\
+				\	\	\	\	<h6 id="tag_icon' + String(loopindex) + '" class="tag_icon_text">+</h6>\
+				\	\	\	</div>\
+				\	\	\	<div>\
+				\	\	\	\	<div class="appearing_div" id="tag_div' + String(loopindex) + '">\
+				\	\	\	\	\	<form class="tag_form tag_div" id="tag_form' + String(loopindex) + '">\
+				\	\	\	\	\	\	<textarea id="tag_url' + String(loopindex) + '" class="hidden" name="url" rows="1" cols="20" >' + url + '</textarea>\
+				\	\	\	\	\	\	<div id="orig_tag_wrapper' + String(loopindex) + '" class="suggestion_box">\
+				\	\	\	\	\	\	\	<textarea id="orig_tags' + String(loopindex) + '" name="orig_tags" rows="1" cols="50" placeholder="Tags for Original Song (ex. John Cale, Paris 1919)"></textarea>\
+				\	\	\	\	\	\	\	<ul id="orig_tag_list' + String(loopindex) + '" class="auto-list add_auto-list"></ul>\
+				\	\	\	\	\	\	</div>\
+				\	\	\	\	\	\	<div id="cover_tag_wrapper' + String(loopindex) + '" class="suggestion_box">\
+				\	\	\	\	\	\	\	<textarea id="cover_tags' + String(loopindex) + '" name="cover_tags" rows="1" cols="50" placeholder="Tags for Cover Song (ex. Owen Pallett, Live)"></textarea>\
+				\	\	\	\	\	\	\	<ul id="cover_tag_list' + String(loopindex) + '" class="auto-list add_auto-list"></ul>\
+				\	\	\	\	\	\	</div>\
+				\	\	\	\	\	\	<input id="tag_button' + String(loopindex) + '" class="submit_button tag_button" type="submit" value="Add These Tags">\
+				\	\	\	\	\	\	<div class="tag_close_container">\
+				\	\	\	\	\	\	\	<p id="close_button' + String(loopindex) + '" onclick="close_button_click' + String(loopindex) + '()" class="tag_close_button">Close</p>\
+				\	\	\	\	\	\	</div>\
+				\	\	\	\	\	</form>\
+				\	\	\	\	</div>\
+				\	\	\	</div>\
+				\	\	</div>';
 			}
 
 
 
+			function generate_new_tag_function(loopindex) {
+				setTimeout(function() {
+				window['tagout' + loopindex] = 0;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+				var script = document.createElement( 'script' );
+				var code = '\
+				\	function vid_mouseover' + String(loopindex) + '() {\
+					\	$("#tag_icon' + String(loopindex) + '").css({\
+						\	"height":"80",\
+						\	 "border-left":"4px solid white",\
+						\	 "border-right": "4px solid white",\
+						\	 "border-bottom": "4px solid white"\
+						\ });}\
+	\
+	\	\	\	\	function vid_mouseout' + String(loopindex) + '() {\
+		\	\	\	\	$("#tag_icon' + String(loopindex) + '").css({\
+			\	\	\	\	"height":"0",\
+			\	\	\	\	 "border": "none"\
+			\	\	\	});}\
+	\
+	\	\	\	\	function tag_icon_mouseover' + String(loopindex) + '() {\
+		\	\	\	\	$("#tag_icon' + String(loopindex) + '").css({\
+			\	\	\	\	"height":"80",\
+			\	\	\	\	 "width":"100px",\
+			\	\	\	\	 "border-left":"4px solid white",\
+			\	\	\	\	 "border-right": "4px solid white",\
+			\	\	\	\	 "border-bottom": "4px solid white"\
+			\	\	});}\
+	\
+	\	\	\	\	function tag_icon_mouseout' + String(loopindex) + '() {\
+		\	\	\	\	$("#tag_icon' + String(loopindex) + '").css({\
+			\	\	\	\	"height":"0",\
+			\	\	\	\	 "border": "none"\
+	\
+	\	\	\	\	});}\
+	\
+	\	\	\	\	function close_button_click' + String(loopindex) + '() {\
+		\	\	\	\	$("#tag_div' + String(loopindex) + '").css({"height" : "0px"});\
+		\	\	\	\	$("#tag_icon' + String(loopindex) + '").html("+");\
+		\	\	\	\	tagout' + String(loopindex) + ' = 0;\
+		\	\	\	\	$(".tag_display").fadeOut(700);\
+		\	\	\	\	$("iframe").css({"opacity":"1"});\
+	\	\	\	};' + '\
+	\
+	\	\	\	\	var tag_form_id = $("#tag_form' + String(loopindex) + '");\
+	\	\	\	\	var orig_tag_wrapper_id = $("#orig_tag_wrapper' + String(loopindex) + '");\
+	\	\	\	\	var orig_tag_textarea_id = $("#orig_tags' + String(loopindex) + '");\
+	\	\	\	\	var orig_tag_list_id = $("#orig_tag_list' + String(loopindex) + '");\
+	\	\	\	\	var orig_tag_textarea_plain_id = "$(\'#orig_tags' + String(loopindex) + '\')";\
+	\	\	\	\	var cover_tag_wrapper_id = $("#cover_tag_wrapper' + String(loopindex) + '");\
+	\	\	\	\	var cover_tag_textarea_id = $("#cover_tags' + String(loopindex) + '");\
+	\	\	\	\	var cover_tag_list_id = $("#cover_tag_list' + String(loopindex) + '");\
+	\	\	\	\	var cover_tag_textarea_plain_id = "$(\'#cover_tags' + String(loopindex) + '\')";' + "\
+	\
+	\	\	\	\	$('#tag_icon" + String(loopindex) + "').live('click',function() {\
+		\	\	\	\	if (tagout" + String(loopindex) + " == 0) {\
+			\	\	\	\	$('#tag_div" + String(loopindex) + "').css({'height' : window.video_height, 'width': window.video_width});\
+			\	\	\	\	$('#tag_icon" + String(loopindex) + "').html('-');\
+			\	\	\	\	tagout" + String(loopindex) + " = 1;\
+			\	\	\	\	$('.tag_display').fadeIn(700);\
+			\	\	\	\	$('iframe').css({'opacity':'.2'\
+				\	\	});}\
+	\	\	\	\	\	else {\
+		\	\	\	\	\	$('#tag_icon" + String(loopindex) + "').html('+');\
+		\	\	\	\	\	tagout" + String(loopindex) + " = 0;\
+		\	\	\	\	\	$('#tag_div" + String(loopindex) + "').css({'height' : '0px'});\
+		\	\	\	\	\	$('.tag_display').fadeOut(700);\
+		\	\	\	\	\	$('iframe').css({'opacity':'1'});\
+	\	\	\	\	\	}\
+	\	\	\	\	});\
+	\
+	\	\	\	\	hint_keypress_mechanic(tag_form_id, orig_tag_wrapper_id, orig_tag_textarea_id, orig_tag_list_id, orig_tag_textarea_plain_id);\
+	\	\	\	\	hint_keypress_mechanic(tag_form_id, cover_tag_wrapper_id, cover_tag_textarea_id, cover_tag_list_id, cover_tag_textarea_plain_id);\
+	\
+	\
+	\
+	\
+	\
+	";
+				script.type = 'text/javascript';
+				try {
+					script.appendChild(document.createTextNode(code));
+					document.body.appendChild(script);
+					}
+				catch (e) {
+					script.text = code;
+					document.body.appendChild(script);
+					}
+			}, 100);
+	}
 
 			function input_clicked_value(textarea_id, li_id) {
 				textarea_id.focus();
@@ -244,24 +367,20 @@
 
 			// This function ensures that clicking anywhere on the page
 			// will clear the hint list. namespace this!
-			function hint_clear(hint_container) {
-				$(hint_container + ' textarea').focusout(function () {
-					nth = -2;
-					setTimeout(function() {
-						$(hint_container + ' ul').html('');
-					}, 100);
+			function hint_clear(hint_container) {  // with only one instance, is this function necessary to build, or just call?
+				$(hint_container + ' textarea').live( {
+					focusout : function () {
+						nth = -2;
+						setTimeout(function() {
+							$(hint_container + ' ul').html('');
+						}, 100);
+					}
 				});
 			}
 
 			hint_clear('.appearing_div');
 
-			/*
-			{% for vid in vids %}
-			hint_clear('#tag_form{{ loop.index }}');
-			{% endfor %}
-			*/
-
-			function trim_whitespace (str) {
+			function trim_whitespace(str) {
 			    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 			}
 
@@ -293,7 +412,7 @@
 						    	var json = response;
 						    	var list_insert = "";
 						    	if (json) {
-							    	obj = JSON && JSON.parse(json) || $.parseJSON(json);
+							    	var obj = JSON && JSON.parse(json) || $.parseJSON(json);
 							    	for (var i = 0; i < obj.length; i++) {
 							    		list_insert += list_template(obj[i], partial_query_length, textarea_plain_id);
 							    	}
@@ -325,7 +444,7 @@
 
 
 			var search_form = $('#advanced_search');
-			var add_form = $('add');
+			var add_form = $('#add');
 
 			var orig_search_wrapper = $('#orig_search_wrapper');
 			var cover_search_wrapper = $('#cover_search_wrapper');
@@ -358,53 +477,9 @@
 			var mouse_moved = 0;
 
 
-			{% for vid in vids %}
-			var tag_form_id = $('#tag_form{{ loop.index }}');
-			var orig_tag_wrapper_id = $('#orig_tag_wrapper{{ loop.index }}');
-			var orig_tag_textarea_id = $('#orig_tags{{ loop.index }}');
-			var orig_tag_list_id = $('#orig_tag_list{{ loop.index }}');
-			var orig_tag_textarea_plain_id = "$('#orig_tags{{ loop.index }}')";
-
-			var cover_tag_wrapper_id = $('#cover_tag_wrapper{{ loop.index }}');
-			var cover_tag_textarea_id = $('#cover_tags{{ loop.index }}');
-			var cover_tag_list_id = $('#cover_tag_list{{ loop.index }}');
-			var cover_tag_textarea_plain_id = "$('#cover_tags{{ loop.index }}')";
-			
-			hint_keypress_mechanic(tag_form_id, orig_tag_wrapper_id, orig_tag_textarea_id, orig_tag_list_id, orig_tag_textarea_plain_id);
-			hint_keypress_mechanic(tag_form_id, cover_tag_wrapper_id, cover_tag_textarea_id, cover_tag_list_id, cover_tag_textarea_plain_id);
-
-			var tagout{{ loop.index }} = 0;
-
-
-			$('#tag_icon{{ loop.index }}').live('click',function() {
-				if (tagout{{ loop.index }} == 0) {
-					$('#tag_div{{ loop.index }}').css({'height' : '600px'});
-					$('#tag_icon{{ loop.index }}').html('-');
-					tagout{{ loop.index}} = 1;
-					$('.tag_display').fadeIn(100);
-					$('iframe').css({'opacity':'.2'});
-				}
-				else {
-					$('#tag_icon{{ loop.index }}').html('+');
-					tagout{{ loop.index}} = 0;
-					$('#tag_div{{ loop.index }}').css({'height' : '0px'});
-					$('.tag_display').fadeOut(100);
-					$('iframe').css({'opacity':'1'});
-				}
-			})
-			{% endfor %}
-
-
-
-
-
-			// get jquery ids up front, put as parameters in function, to speed up.
-			// disable arrows sending queries, or any other accidental keys. this 
-			// is to minimize cost and computational expense
 			function hint_keypress_mechanic(form_id, wrapper_id, textarea_id, list_id, textarea_plain_id) {
 				textarea_id.keydown(function(e) {
 					mouse_moved = 0;
-
 					list_nth_child_id = list_id.find('li:eq(' + nth + ')');
 					// ENTER
 				    if (e.keyCode == 13){
@@ -452,9 +527,16 @@
 							list_nth_child_id.css({'background-color':'#ddd'});
 						}
 					}
+					// ESC
+					else if (e.keyCode == 27) {
+						nth = -2;
+						setTimeout(function() {
+							list_id.html('');
+						}, 100);
+					}
 				});
 			}
-			
+
 
 			hint_keypress_mechanic(search_form, orig_search_wrapper, orig_search_textarea, orig_search_list, orig_search_textarea_plain_id);
 			hint_keypress_mechanic(search_form, cover_search_wrapper, cover_search_textarea, cover_search_list, cover_search_textarea_plain_id);
@@ -466,20 +548,32 @@
 			// and properly namespaced.
 
 			$('#add_display').click(function() {
-				$('#add_div').css({'display':'block','height': '250px'});
-				$('.display_button').css('display', 'none');
-				$('#hamburger').css({'height':'170px', 'display':'block'});
+				$('#add_div').css({'display':'block','height': '270px'});
+				$('.display_button').css({'display': 'none'});
+				if (window.window_var.width() > 800) {
+					$('#hamburger').css({'height':'170px', 'display':'block'});
+				}
+				else {
+					$('#hamburger').css({'height':'40px', 'display':'block'});
+					$('#navigation_panel .appearing_div').css({'margin': '0 0 0 ' + String($('#navigation_panel').width()/2 - $('#add_orig').width()/2)});
+				}
 			});
 
 			$('#search_display').click(function() {
 				$('#search_div').css({'display':'block','height': '170px'});
 				$('.display_button').css('display', 'none');
-				$('#hamburger').css({'height':'170px', 'display':'block'});
+				if (window.window_var.width() > 800) {
+					$('#hamburger').css({'height':'170px', 'display':'block'});
+				}
+				else {
+					$('#hamburger').css({'height':'40px', 'display':'block'});
+					$('#navigation_panel .appearing_div').css({'margin': '0 0 0 ' + String($('#navigation_panel').width()/2 - $('#add_orig').width()/2)});
+				}
 			});
 
 			$('#hamburger').click(function() {
-				$('#add_div').css({'display':'none', 'height':'0px'});
-				$('#search_div').css({'display':'none', 'height':'0px'});
+				$('#add_div').css({'height':'0px'});
+				$('#search_div').css({'height':'0px'});
 				$('.display_button').css('display', 'block');
 				$('#hamburger').css({'height':'0px', 'display':'none'});
 			});
@@ -502,6 +596,76 @@
 
 
 			{% for vid in vids %}
+
+			function vid_mouseover{{ loop.index }}() {
+				$("#tag_icon{{ loop.index }}").css( {
+					"height":"80", 
+					"border-left":"4px solid white", 
+					"border-right": "4px solid white", 
+					"border-bottom": "4px solid white"
+				});
+			}
+
+			function vid_mouseout{{ loop.index }}() {
+				$("#tag_icon{{ loop.index }}").css( {
+					"height":"0", "border": "none"
+				});
+			}
+
+			function tag_icon_mouseover{{ loop.index }}() {
+				$("#tag_icon{{ loop.index }}").css({
+					"height":"80", 
+					"width":"100px", 
+					"border-left":"4px solid white", 
+					"border-right": "4px solid white", 
+					"border-bottom": "4px solid white"});
+			}
+
+			function tag_icon_mouseout{{ loop.index }}() {
+				$("#tag_icon{{ loop.index }}").css({"height":"0", "border": "none"});
+			}
+
+			function close_button_click{{ loop.index }}() {
+				$('#tag_div{{ loop.index }}').css({'height' : '0px'});
+				$('#tag_icon{{ loop.index }}').html('+');
+				tagout{{ loop.index}} = 0;
+				$('.tag_display').fadeOut(100);$('iframe').css({'opacity':'1'});
+			}
+
+			var tag_form_id = $('#tag_form{{ loop.index }}');
+			var orig_tag_wrapper_id = $('#orig_tag_wrapper{{ loop.index }}');
+			var orig_tag_textarea_id = $('#orig_tags{{ loop.index }}');
+			var orig_tag_list_id = $('#orig_tag_list{{ loop.index }}');
+			var orig_tag_textarea_plain_id = "$('#orig_tags{{ loop.index }}')";
+
+			var cover_tag_wrapper_id = $('#cover_tag_wrapper{{ loop.index }}');
+			var cover_tag_textarea_id = $('#cover_tags{{ loop.index }}');
+			var cover_tag_list_id = $('#cover_tag_list{{ loop.index }}');
+			var cover_tag_textarea_plain_id = "$('#cover_tags{{ loop.index }}')";
+
+			hint_keypress_mechanic(tag_form_id, orig_tag_wrapper_id, orig_tag_textarea_id, orig_tag_list_id, orig_tag_textarea_plain_id);
+			hint_keypress_mechanic(tag_form_id, cover_tag_wrapper_id, cover_tag_textarea_id, cover_tag_list_id, cover_tag_textarea_plain_id);
+
+			var tagout{{ loop.index }} = 0;
+
+
+			$('#tag_icon{{ loop.index }}').live('click',function() {
+				if (tagout{{ loop.index }} == 0) {
+					$('#tag_div{{ loop.index }}').css({'height' : window.video_height, 'width': window.video_width});
+					$('#tag_icon{{ loop.index }}').html('-');
+					tagout{{ loop.index}} = 1;
+					$('.tag_display').fadeIn(700);
+					$('iframe').css({'opacity':'.2'});
+				}
+				else {
+					$('#tag_icon{{ loop.index }}').html('+');
+					tagout{{ loop.index}} = 0;
+					$('#tag_div{{ loop.index }}').css({'height' : '0px'});
+					$('.tag_display').fadeOut(700);
+					$('iframe').css({'opacity':'1'});
+				}
+			})
+
 			$('#tag_button{{ loop.index }}').click(function() {
 				var tag_url = $('#tag_url{{ loop.index }}').text();
 				var tag_orig_tags = $('#orig_tags{{ loop.index}}').val();
@@ -516,13 +680,6 @@
 					}
 				}).done(function(response) {
 					var json = response;
-					console.log(response);
-					/*if (json) {
-				    	obj = JSON && JSON.parse(json) || $.parseJSON(json);
-				    	for (var i = 0; i < obj.length; i++) {
-				    		console.log(obj[i]);
-				    	}
-				    }*/
 				});
 				return false;
 			})
@@ -541,20 +698,11 @@
 					}
 				}).done(function(response) {
 					var json = response;
-					console.log(response);
-					/*if (json) {
-				    	obj = JSON && JSON.parse(json) || $.parseJSON(json);
-				    	for (var i = 0; i < obj.length; i++) {
-				    		console.log(obj[i]);
-				    	}
-				    }*/
 				});
 				return false;
 			})
 
 			{% endfor %}
-
-
 
 		</script>
 	</body>

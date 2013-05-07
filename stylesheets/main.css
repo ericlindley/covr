@@ -11,6 +11,11 @@ a {
 	color: white;
 }
 
+button {
+	width: 200px;
+	margin: 10px auto 0px 50px;
+}
+
 /* Glyph, by Harry Roberts */
 		
 hr {
@@ -19,6 +24,7 @@ hr {
     border-top: medium double #333;
     color: #333;
     text-align: center;
+    margin-bottom: 15px;
 }
 
 hr:after {
@@ -42,6 +48,8 @@ input, textarea {
 	font-size: 1em;
 	white-space: nowrap;
 	overflow: hidden;
+	vertical-align:middle;
+	font-family: Verdana, Helvetica, sans-serif;
 }
 
 ul.auto-list{
@@ -67,15 +75,49 @@ ul.auto-list > li {
 	padding: 2px;
 }
 
+::-webkit-input-placeholder { /* WebKit browsers */
+    color:    #999;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color:    #999;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color:    #999;
+}
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+    color:    #999;
+}
+
 .appearing_div {
-	-webkit-transition-duration: 0.3s;
-	-moz-transition-duration: 0.3s;
-	-o-transition-duration: 0.3s;
-	transition-duration: 0.3s;
+	-webkit-transition-duration: 0.7s;
+	-moz-transition-duration: 0.7s;
+	-o-transition-duration: 0.7s;
+	transition-duration: 0.7s;
 	height: 0px;
 	position: absolute;
 	overflow:hidden;
 	z-index: 2;
+}
+
+.appearing_div textarea {
+	margin: 3px 0;
+}
+
+.display_button {
+	font-size: 8em;
+	width: 200px;
+	margin: 0 auto 25% auto;
+	background-color: white;
+	height: 170px;
+	-webkit-transition-duration: 2s;
+	-moz-transition-duration: 2s;
+	-o-transition-duration: 2s;
+	transition-duration: 2s;
+}
+
+.display_button:hover {
+	cursor:pointer;
+	border-color: white;
 }
 
 .hidden {
@@ -90,6 +132,10 @@ ul.auto-list > li {
 
 .margin_correct {
 	margin: 0.5em;
+}
+
+.relative {
+	position: relative;
 }
 
 .submit_button, button {
@@ -137,43 +183,9 @@ ul.auto-list > li {
 	background: #fafafa;
 }
 
-button {
-	width: 200px;
-	margin: 10px auto 0px 50px;
-}
-
 .suggestion_box {
 	position:relative;
 }
-
-.display_button {
-	font-size: 8em;
-	width: 200px;
-	margin: 0 auto 25% auto;
-	background-color: white;
-	height: 170px;
-	-webkit-transition-duration: 0.3s;
-	-moz-transition-duration: 0.3s;
-	-o-transition-duration: 0.3s;
-	transition-duration: 0.3s;
-}
-
-.display_button:hover {
-	cursor:pointer;
-	border-color: white;
-}
-
-.relative {
-	position: relative;
-}
-
-/*
-.tag_div {
-	background-color: black;
-	height: 100px;
-	width: 280px;
-}
-*/
 
 .tag_display {
 	position:absolute;
@@ -215,7 +227,7 @@ button {
 
 .tag_icon_container {
 	position:absolute;
-	z-index: 1;
+	z-index: 3;
 	overflow: hidden;
 	-webkit-transition-duration: 0.3s;
 	-moz-transition-duration: 0.3s;
@@ -254,34 +266,7 @@ button {
 	height: 100%;
 	background-color: white;
 	z-index: 1;
-	position:absolute;
-}
-
-#message_wrapper {
-	position: absolute;
-	background-color: black;
-	text-align: center;
-	margin-top: 10%;
-	margin-left: 10%;
-	border: 5px solid white;
-	-moz-border-radius: 15px;
-	-webkit-border-radius: 15px;
-	border-radius: 15px;
-	z-index: 99;
-}
-
-#message_wrapper h2 {
-	color: white;
-}
-
-#navigation_container {
-	position:relative;
-}
-
-#search_display {
-	background-image: url('images/search.png');
-	background-repeat: no-repeat;
-	background-position: center;
+	position:fixed;
 }
 
 #display_case {
@@ -310,6 +295,28 @@ button {
 	display: none;
 }
 
+#message_wrapper {
+	position: absolute;
+	background-color: black;
+	text-align: center;
+	margin-top: 10%;
+	margin-left: 10%;
+	border: 5px solid white;
+	-moz-border-radius: 15px;
+	-webkit-border-radius: 15px;
+	border-radius: 15px;
+	z-index: 4;
+	padding: 10px;
+}
+
+#message_wrapper h2 {
+	color: white;
+}
+
+#navigation_container {
+	position:relative;
+}
+
 #navigation_panel {
 	position:absolute;
 	width: 300px;
@@ -321,8 +328,69 @@ button {
 	text-align: center;
 }
 
+#search_display {
+	background-image: url('images/search.png');
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
 @media all and (min-width: 800px) {
 }
 
 @media all and (max-width: 800px) {
+	#black_panel {
+		display:none;
+	}
+
+	#add_display {
+		width: 40px;
+		height: 40px;
+		font-size: 27px;
+		position: fixed;
+		top: 5;
+		left: 55;
+	}
+
+	#display_case {
+		position: relative;
+		padding-left:0px;
+	}
+
+	#hamburger {
+		width: 40px;
+		height: 40px;
+		font-size: 27px;
+		position: fixed;
+		top: 5;
+		left: 5;
+	}
+
+	#navigation_panel {
+		position:relative;
+		width: auto;
+		z-index: 5;
+	}
+
+	#navigation_panel .appearing_div {
+		position: relative;
+		display: block;
+		margin: 0 50;
+	}
+
+	#search_display {
+		width: 40px;
+		height: 40px;
+		background-size: 40px;
+		position: fixed;
+		top: 5;
+		left: 5;
+	}
+
+	.display_button {
+		margin: 0;
+	}
+
+	.vid {
+		clear:both;
+	}
 }
