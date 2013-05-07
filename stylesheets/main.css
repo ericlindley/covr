@@ -124,12 +124,6 @@ ul.auto-list > li {
 	display:none;
 }
 
-.tag_button {
-	width: 200px;
-	margin: auto;
-	float: left;
-}
-
 .margin_correct {
 	margin: 0.5em;
 }
@@ -185,6 +179,27 @@ ul.auto-list > li {
 
 .suggestion_box {
 	position:relative;
+}
+
+.tag_added_message {
+	background-color: black;
+	text-align: center;
+	border: 5px solid white;
+	-moz-border-radius: 15px;
+	-webkit-border-radius: 15px;
+	border-radius: 15px;
+	z-index: 4;
+	padding: 10px;
+	color: white;
+	font-weight: bold;
+	width: 10em;
+	font-size: 1.5em;
+}
+
+.tag_button {
+	width: 200px;
+	margin: auto;
+	float: left;
 }
 
 .tag_display {

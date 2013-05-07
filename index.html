@@ -171,7 +171,7 @@
 				});
 
 				$('.tag_display').css({
-					'width': window.video_width, 'height': window.video_height
+					'width': window.video_width-20, 'height': window.video_height-20
 				});
 			}
 
@@ -334,12 +334,13 @@
 	\
 	\	\	\	\	hint_keypress_mechanic(tag_form_id, orig_tag_wrapper_id, orig_tag_textarea_id, orig_tag_list_id, orig_tag_textarea_plain_id);\
 	\	\	\	\	hint_keypress_mechanic(tag_form_id, cover_tag_wrapper_id, cover_tag_textarea_id, cover_tag_list_id, cover_tag_textarea_plain_id);\
+	\	\	\	\	tag_enter_submit(" + String(loopindex) + ");\
+	\	\	\	\	tag_click_submit(" + String(loopindex) + ");\
 	\
 	\
 	\
-	\
-	\
-	";
+\	\
+\	";
 				script.type = 'text/javascript';
 				try {
 					script.appendChild(document.createTextNode(code));
@@ -649,6 +650,7 @@
 			var tagout{{ loop.index }} = 0;
 
 
+
 			$('#tag_icon{{ loop.index }}').live('click',function() {
 				if (tagout{{ loop.index }} == 0) {
 					$('#tag_div{{ loop.index }}').css({'height' : window.video_height, 'width': window.video_width});
@@ -666,41 +668,57 @@
 				}
 			})
 
-			$('#tag_button{{ loop.index }}').click(function() {
-				var tag_url = $('#tag_url{{ loop.index }}').text();
-				var tag_orig_tags = $('#orig_tags{{ loop.index}}').val();
-				var tag_cover_tags = $('#cover_tags{{ loop.index}}').val();
-				$.ajax({
-					url: '/tag', 
-					type: 'POST',
-					data: {
-						url : tag_url,
-						orig_tags : tag_orig_tags,
-						cover_tags : tag_cover_tags
-					}
-				}).done(function(response) {
-					var json = response;
-				});
-				return false;
-			})
 
-			$('#tag_form{{ loop.index }}').submit(function() {
-				var tag_url = $('#tag_url{{ loop.index }}').text();
-				var tag_orig_tags = $('#orig_tags{{ loop.index}}').val();
-				var tag_cover_tags = $('#cover_tags{{ loop.index}}').val();
-				$.ajax({
-					url: '/tag', 
-					type: 'POST',
-					data: {
-						url : tag_url,
-						orig_tags : tag_orig_tags,
-						cover_tags : tag_cover_tags
-					}
-				}).done(function(response) {
-					var json = response;
-				});
-				return false;
-			})
+			function tag_enter_submit(index) {
+				$('#tag_form' + String(index)).submit(function() {
+					var tag_url = $('#tag_url' + String(index)).text();
+					var tag_orig_tags = $('#orig_tags' + String(index)).val();
+					var tag_cover_tags = $('#cover_tags' + String(index)).val();
+					$.ajax({
+						url: '/tag', 
+						type: 'POST',
+						data: {
+							url : tag_url,
+							orig_tags : tag_orig_tags,
+							cover_tags : tag_cover_tags
+						}
+					}).done(function(response) {
+						var json = response;
+					});
+					return false;
+				})
+			}
+
+			function tag_click_submit(index) {
+				$('#tag_button' + String(index)).click(function() {
+					var tag_url = $('#tag_url' + String(index)).text();
+					var tag_orig_tags = $('#orig_tags' + String(index)).val();
+					var tag_cover_tags = $('#cover_tags' + String(index)).val();
+					$('#tag_form' + String(index)).html('<img class="loading_spinner" src="/stylesheets/images/loader.gif">');
+					$.ajax({
+						url: '/tag', 
+						type: 'POST',
+						data: {
+							url : tag_url,
+							orig_tags : tag_orig_tags,
+							cover_tags : tag_cover_tags
+						}
+					}).done(function(response) {
+						var json = response;
+						$('#tag_form' + String(index)).html('<p class="tag_added_message">Success!</p>');
+						setTimeout(function() {
+							$('#tag_form' + String(index)).fadeOut(2000);
+						}, 1000);
+						setTimeout(function() {
+							$('#tag_div' + String(index)).css({'z-index': '-1'})
+						}, 3000);
+					});
+					return false;
+				})
+			}
+
+			tag_enter_submit({{ loop.index }});
+			tag_click_submit({{ loop.index }});
 
 			{% endfor %}
 
