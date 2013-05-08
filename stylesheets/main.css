@@ -106,7 +106,7 @@ ul.auto-list > li {
 .display_button {
 	font-size: 8em;
 	width: 200px;
-	margin: 0 auto 25% auto;
+	margin: 0 auto 10px auto;
 	background-color: white;
 	height: 170px;
 	-webkit-transition-duration: 2s;

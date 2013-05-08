@@ -22,14 +22,20 @@
 				<div class="appearing_div" id="search_div">
 					<form id="advanced_search" action="/" method="get" enctype="multipart/form-data">
 						<div id="orig_search_wrapper" class="margin_correct suggestion_box">
-							<textarea id="search_orig" rows="1" maxlength="60" name="orig_search" placeholder="Search by Original Tags (ex. halleluja)"></textarea>
+							<textarea id="search_orig" rows="1" maxlength="60" name="orig_search" placeholder="Search by Original Tags"></textarea>
 							<ul id="orig_search_list" class="auto-list">
 							</ul>
+							<div id="orig_search_sugg" class="hidden">
+								<p>For example: <b>leonard cohen, halleluja</b></p>
+							</div>
 						</div>
 						<div id="cover_search_wrapper" class="margin_correct suggestion_box">
-							<textarea id="search_cover" rows="1" maxlength="60" name="cover_search" placeholder="Search by Cover Tags (ex. mournful, sweet)"></textarea>
+							<textarea id="search_cover" rows="1" maxlength="60" name="cover_search" placeholder="Search by Cover Tags"></textarea>
 							<ul id="cover_search_list" class="auto-list">
 							</ul>
+							<div id="cover_search_sugg" class="hidden">
+								<p>For example: <b>john cale, mournful, sweet</b></p>
+							</div>
 						</div>
 						<input class="margin_correct submit_button" type="submit" value="Search">
 					</form>
@@ -42,17 +48,26 @@
 				<div class="appearing_div" id="add_div">
 					<form id="add" action="/add" method="post" endtype="multipart/form-data">
 						<div id="orig_add_wrapper" class="margin_correct suggestion_box">
-							<textarea id="add_orig" rows="1" name="orig_tags" maxlength="60" placeholder="Tags for Original Song (ex. eleanor rigby, beatles, sad, strings)"></textarea>
+							<textarea id="add_orig" rows="1" name="orig_tags" maxlength="60" placeholder="Tags for Original Song"></textarea>
 							<ul id="orig_add_list" class="auto-list">
 							</ul>
+							<div id="orig_add_sugg" class="hidden">
+								<p>For example: <b>eleanor rigby, beatles, sad, strings</b></p>
+							</div>
 						</div>
 						<div id="cover_add_wrapper" class="margin_correct suggestion_box">
-							<textarea id="add_cover" rows="1" name="cover_tags" maxlength="60" placeholder="Tags for Cover Song (ex. aretha franklin, soul, energetic)"></textarea>
+							<textarea id="add_cover" rows="1" name="cover_tags" maxlength="60" placeholder="Tags for Cover Song"></textarea>
 							<ul id="cover_add_list" class="auto-list">
 							</ul>
+							<div id="cover_add_sugg" class="hidden">
+								<p>For example: <b>aretha franklin, soul, energetic</b></p>
+							</div>
 						</div>
 						<div class="margin_correct relative">
-							<textarea id="add_url" rows="1" name="url" maxlength="150" placeholder="URL for song (ex. https://www.youtube.com/watch?v=d-xSxWX7_-4)"></textarea>
+							<textarea id="add_url" rows="1" name="url" maxlength="150" placeholder="Vimeo or Youtube URL For Song"></textarea>
+							<div id="url_add_sugg" class="hidden">
+								<p>For example: <b>https://youtube.com/watch?v=d-xSxWX7_-4</b></p>
+							</div>
 						</div>
 						<input id="add_button" class="margin_correct submit_button" type="submit" value="Upload This Video">
 					</form>
@@ -136,7 +151,7 @@
 
 				if (window.window_var.width() > 800) {
 					var display_width = window.window_var.width() - 300; // this will change when the window is too small.
-					display_button_var.css({'width': '200px', 'height': '200px'});
+					display_button_var.css({'width': '200px', 'height': '170px'});
 					nav_panel_appearing_var.css({'margin':'auto'});
 				}
 				else {
@@ -639,8 +654,49 @@
 			});
 
 
+			// USER INTERFACE CLUES
+
+			$("#add_orig").focus( function() {
+				$("#orig_add_sugg").slideDown(500);
+			})
+
+			$("#add_cover").focus( function() {
+				$("#cover_add_sugg").slideDown(500);
+			})
+
+			$("#add_url").focus( function() {
+				$("#url_add_sugg").slideDown(500);
+			})
+
+			$("#add_orig").focusout( function() {
+				$("#orig_add_sugg").slideUp(500);
+			})
+
+			$("#add_cover").focusout( function() {
+				$("#cover_add_sugg").slideUp(500);
+			})
+
+			$("#add_url").focusout( function() {
+				$("#url_add_sugg").slideUp(500);
+			})
 
 
+
+			$("#search_orig").focus( function() {
+				$("#orig_search_sugg").slideDown(500);
+			})
+
+			$("#search_cover").focus( function() {
+				$("#cover_search_sugg").slideDown(500);
+			})
+
+			$("#search_orig").focusout( function() {
+				$("#orig_search_sugg").slideUp(500);
+			})
+
+			$("#search_cover").focusout( function() {
+				$("#cover_search_sugg").slideUp(500);
+			})
 
 
 
