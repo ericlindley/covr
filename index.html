@@ -151,7 +151,7 @@
 
 				if (window.window_var.width() > 800) {
 					var display_width = window.window_var.width() - 300; // this will change when the window is too small.
-					display_button_var.css({'width': '200px', 'height': '170px'});
+					display_button_var.css({'width': '80px', 'height': '70px'});
 					nav_panel_appearing_var.css({'margin':'auto'});
 				}
 				else {
@@ -631,10 +631,10 @@
 
 			function display_click_mechanic(clicked, sub_div) {
 				clicked.click(function() {
-					sub_div.css({'display':'block','height': '270px'});
+					sub_div.css({'display':'block','height': '350px'});
 					$('.display_button').css({'display': 'none'});
 					if (window.window_var.width() > 800) {
-						$('#hamburger').css({'height':'170px', 'display':'block'});
+						$('#hamburger').css({'height':'70px', 'display':'block'});
 					}
 					else {
 						$('#hamburger').css({'height':'40px', 'display':'block'});

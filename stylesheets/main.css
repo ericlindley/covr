@@ -104,20 +104,22 @@ ul.auto-list > li {
 }
 
 .display_button {
-	font-size: 8em;
-	width: 200px;
+	font-size: 5em;
+	line-height: 0;
+	width: 80px;
 	margin: 0 auto 10px auto;
 	background-color: white;
-	height: 170px;
+	height: 70px;
 	-webkit-transition-duration: 2s;
 	-moz-transition-duration: 2s;
 	-o-transition-duration: 2s;
 	transition-duration: 2s;
+	border-color: white;
 }
 
 .display_button:hover {
 	cursor:pointer;
-	border-color: white;
+	border-color: black;
 }
 
 .hidden {
@@ -347,6 +349,7 @@ ul.auto-list > li {
 	background-image: url('images/search.png');
 	background-repeat: no-repeat;
 	background-position: center;
+	background-size: 1em;
 }
 
 @media all and (min-width: 800px) {
