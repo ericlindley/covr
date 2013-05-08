@@ -4,6 +4,7 @@
 	    <link href='http://fonts.googleapis.com/css?family=Ultra' rel='stylesheet' type='text/css'>
 	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" type="text/javascript" ></script>
 	    <script type="text/javascript" src="/stylesheets/main.js"></script>
+	    <script src = "http://www.youtube.com/player_api"></script>
 	</head>
 	<body>
 		<!-- ((((((((((((((((((((((((((((((((( NAVIGATION PANEL ))))))))))))))))))))))))))))))))) -->
@@ -75,7 +76,7 @@
 					<div id="tag_display{{ loop.index }}" class="tag_display">
 						<h2>{{ tags[loop.index - 1] }}</h2>
 					</div>
-					<iframe class="vid" style="z-index:10;" onmouseover="vid_mouseover{{ loop.index }}();" onmouseout="vid_mouseout{{ loop.index }}()" width="560" height="315" src="{{vid.url}}" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>
+					<iframe id="vid_id{{ loop.index }}" onload="floaded{{ loop.index }}()" class="vid" style="z-index:10;" onmouseover="vid_mouseover{{ loop.index }}();" onmouseout="vid_mouseout{{ loop.index }}()" width="560" height="315" src="{{vid.url}}" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>
 					<div class="tag_icon_container" onmouseover="tag_icon_mouseover{{ loop.index }}()" onmouseout="tag_icon_mouseout{{ loop.index }}()">
 						<h6 id="tag_icon{{ loop.index }}" class="tag_icon_text">+</h6>
 					</div>
@@ -114,34 +115,36 @@
 
 		<script type="text/javascript">
 
-			// 	INITIALIZE SIZE AND POSITION OF ELEMENTS, AND RE-INITIALIZE ON WINDOW RESIZE
-			//  SHOULD BE DONE WITH NATIVE CODE (CSS) IF POSSIBLE.
+
+
+			// FADE OUT INITIAL MESSAGE
+			setTimeout(function() {
+				$('#message_wrapper').fadeOut(2000)
+			}, 3000);
+
+
+			///////////////// INITIALIZE SIZE AND POSITION OF ELEMENTS ////////////////
 
 			window.window_var = $(window);
 			window.display_var = $('#display_case');
 			window.video_width;
 			window.video_height;
 
-			// disable tag icon on tagout == 1
-			// disapear all tags on close (or increment 
-			// tagout so that all go back to no tags 
-			// only when they're all closed? (but 
-			// that's not great, because you don't want to))
-			// have to close everything when you watch a video
-			// maybe have to get rid of all tags when close one?
-			// but that's not great, either...  is there another way?
-
 			function set_elements_size_and_position() {
+				var display_button_var = $('.display_button');
+				var nav_panel_appearing_var = $('#navigation_panel .appearing_div');
+
 				if (window.window_var.width() > 800) {
 					var display_width = window.window_var.width() - 300; // this will change when the window is too small.
-					$('.display_button').css({'width': '200px', 'height': '200px'});
-					$('#navigation_panel .appearing_div').css({'margin':'auto'});
+					display_button_var.css({'width': '200px', 'height': '200px'});
+					nav_panel_appearing_var.css({'margin':'auto'});
 				}
 				else {
 					var display_width = window.window_var.width();
-					$('#navigation_panel .appearing_div').css({'margin': '0 0 0 ' + String($('#navigation_panel').width()/2 - $('#add_orig').width()/2)});
-					$('.display_button').css({'width': '40px', 'height': '40px'});
+					nav_panel_appearing_var.css({'margin': '0 0 0 ' + String($('#navigation_panel').width()/2 - $('#add_orig').width()/2)});
+					display_button_var.css({'width': '40px', 'height': '40px'});
 				}
+
 				var vid_var = $('.vid');
 
 				window.display_var.css({
@@ -163,7 +166,7 @@
 				});
 
 				$('.tag_form').css({
-					'margin': String(window.video_height)/2 +' auto auto ' + String(window.video_width/2-$('#orig_tags1').width()/2)
+					'margin': String(window.video_height)/2 +' auto auto ' + String(window.video_width/2-140)
 				});
 
 				$('.tag_icon_container').css({
@@ -175,65 +178,65 @@
 				});
 			}
 
+			// INITIALIZE ON LOAD
 			set_elements_size_and_position();
 
+			// RE-INITIALIZE ON RESIZE
 			window.window_var.resize(function() {
 				set_elements_size_and_position();
 			});
 
 
 
-
-			var end_var = $('#end');
-			var nav_var = $('#navigation_panel');
-			var ajax = 0;
-
-			var offset = 6;
-			var ajax_query = "{{ query }}";
+			/////////////////// AJAX LOAD ON SCROLL MECHANIC //////////////////////
+			window.end_var = $('#end');
+			window.ajax = 0;
+			window.offset = 6;
 
 			window.window_var.scroll(function() {
 				var wind_top = window.window_var.scrollTop();
-				nav_var.css('top', wind_top);
+				$('#navigation_panel').css('top', wind_top);
 
-				if (window.window_var.scrollTop() + window.window_var.height() > end_var.offset().top + end_var.height()/2 && ajax == 0) {
-					ajax = 1;
+				if (window.window_var.scrollTop() + window.window_var.height() > window.end_var.offset().top + window.end_var.height()/2 && window.ajax == 0) {
+					window.ajax = 1;
 					$.ajax({
 						url: '/scroll', 
 						type: 'POST',
 						data: {
-							query: ajax_query,
-							offset: offset
+							query: "{{ query }}",
+							offset: window.offset
 						}
 					}).done(function(response) {
 						var json = response;
 						var obj = JSON && JSON.parse(json) || $.parseJSON(json);
 						var insertion = '';
+						var vid_counter =0;
 						for (var i = 0; i <= 6; i++) {
 							if (obj[i]) {
-								insertion += html_template(obj[String(i)][0], obj[String(i)][1], i + offset + 1);
-								generate_new_tag_function(i + offset + 1);
+								vid_counter += 1;
+								insertion += html_template(obj[String(i)][0], obj[String(i)][1], i + window.offset + 1);
+								generate_new_tag_function(i + window.offset + 1);
 							}
 						}
-						//  LOADING ICON ?
-						//  WAIT UNTIL FULLY LOADED TO INSERT? (PUT IN HIDDEN DIV THEN UNHIDE?)
-						//  maybe just replace icon in the center of the end hr while it loads?
 						$('#all_vids').append(insertion).each(function() {
 							set_elements_size_and_position();
 						});
-						offset = offset + 6;
-						ajax = 0;  // MAKE THIS SOMEWHERE ELSE SO YOU CAN'T KEEP CALLING IT!
+						window.offset = window.offset + 6;
+						if (vid_counter >= 6) {
+							window.ajax = 0;
+						}
 					});
 				}
 			});
 
 
-
+			// TEMPLATE USED FOR NEW VIDEOS LOADED ON SCROLL
 			function html_template(url, tags, loopindex) {
 				return '<div class="vid relative">\
 				\	\	\	<div id="tag_display' + String(loopindex) + '" class="tag_display">\
 				\	\	\	\	<h2>' + tags + '</h2>\
 				\	\	\	</div>\
-				\	\	\	<iframe class="vid" style="z-index:10;" onmouseover="vid_mouseover' + String(loopindex) + '();" onmouseout="vid_mouseout' + String(loopindex) + '()" width="560" height="315" src="' + url + '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>\
+				\	\	\	<iframe id="vid_id' + String(loopindex) + '" onload="floaded' + String(loopindex) + '()" class="vid" style="z-index:10;" onmouseover="vid_mouseover' + String(loopindex) + '();" onmouseout="vid_mouseout' + String(loopindex) + '()" width="560" height="315" src="' + url + '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>\
 				\	\	\	<div class="tag_icon_container" onmouseover="tag_icon_mouseover' + String(loopindex) + '()" onmouseout="tag_icon_mouseout' + String(loopindex) + '()">\
 				\	\	\	\	<h6 id="tag_icon' + String(loopindex) + '" class="tag_icon_text">+</h6>\
 				\	\	\	</div>\
@@ -260,7 +263,7 @@
 			}
 
 
-
+			// TEMPLATE USED FOR CODE ASSOCIATED WITH NEW VIDEO TAGS ON SCROLL
 			function generate_new_tag_function(loopindex) {
 				setTimeout(function() {
 				window['tagout' + loopindex] = 0;
@@ -353,6 +356,14 @@
 			}, 100);
 	}
 
+
+
+
+
+
+			///////////////////////// HINT MECHANIC /////////////////////////////
+
+			// INPUTS CLICKED HINT LIST VALUE INTO ASSOCIATED TEXTAREA
 			function input_clicked_value(textarea_id, li_id) {
 				textarea_id.focus();
 				new_input = li_id.text();
@@ -361,13 +372,22 @@
 				textarea_id.val(existing_query.slice(0, last_comma + 1) + ' ' + new_input);
 			}
 
-
+			// TEMPLATE FOR LIST ELEMENTS FOR HINT
 			function list_template(tag, index, textarea_plain_id) {
 				return '<li onmousedown="input_clicked_value(' + textarea_plain_id + ', $(this))">' + "<b>" + tag.slice(0, index) + "</b>" + tag.slice(index) + '</li>';
 			}
 
-			// This function ensures that clicking anywhere on the page
-			// will clear the hint list. namespace this!
+			// HIGHLIGHT HOVERED HINT
+			$("li").live({
+				mouseenter:
+					function() {
+						$('li').css({'background-color': 'white'});
+						$(this).css({'background-color': '#ddd'});
+						nth = $(this).index();
+					},
+				});
+
+			// CLEARS HINT LIST ON UNFOCUS
 			function hint_clear(hint_container) {  // with only one instance, is this function necessary to build, or just call?
 				$(hint_container + ' textarea').live( {
 					focusout : function () {
@@ -381,11 +401,14 @@
 
 			hint_clear('.appearing_div');
 
+			// STRIPS WHITESPACE FROM BOTH SIDES OF STRING
 			function trim_whitespace(str) {
 			    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 			}
 
-			var partial_query = "";
+
+			//  QUERY DATABASE BY MEANS OF AJAX CALL
+			window.partial_query = "";
 			var nth = -2;
 			var last_query_term;
 			var last_comma;
@@ -393,13 +416,13 @@
 			function hint(textarea_id, list_id, list_nth_child_id, textarea_plain_id) {
 				if (textarea_id.is(':focus')) {
 				    setTimeout(function() {
-				    	partial_query = trim_whitespace(textarea_id.val());
-				    	last_comma = partial_query.lastIndexOf(",");
+				    	window.partial_query = trim_whitespace(textarea_id.val());
+				    	last_comma = window.partial_query.lastIndexOf(",");
 				    	if (last_comma != -1) {
-				    		last_query_term = trim_whitespace(partial_query.slice(last_comma + 1));
+				    		last_query_term = trim_whitespace(window.partial_query.slice(last_comma + 1));
 				    	}
 				    	else {
-				    		last_query_term = partial_query;
+				    		last_query_term = window.partial_query;
 				    	}
 				    	var partial_query_length = last_query_term.length;
 					    if (partial_query_length > 0) {
@@ -407,7 +430,7 @@
 						    	url: '/hint', 
 						    	type: 'POST',
 						    	data: {
-						    		partial_query: partial_query
+						    		partial_query: window.partial_query
 						    	}
 						    }).done(function(response) {
 						    	var json = response;
@@ -443,7 +466,9 @@
 				}
 			}
 
+			// LINK AJAX CALL TO KEYED IN QUERIES
 
+			// DECLARE USEFUL ID'S
 			var search_form = $('#advanced_search');
 			var add_form = $('#add');
 
@@ -477,7 +502,7 @@
 
 			var mouse_moved = 0;
 
-
+			// PER KEY HINT MECHANIC
 			function hint_keypress_mechanic(form_id, wrapper_id, textarea_id, list_id, textarea_plain_id) {
 				textarea_id.keydown(function(e) {
 					mouse_moved = 0;
@@ -491,7 +516,7 @@
 				    	else {
 				    		if (list_nth_child_id.text().length > 0) {
 				    			current_selection = list_nth_child_id.text();
-				    			textarea_id.val(partial_query.slice(0, last_comma + 1) + ' ' + current_selection);
+				    			textarea_id.val(window.partial_query.slice(0, last_comma + 1) + ' ' + current_selection);
 				    			list_id.html("");
 				 		   		nth = -2;
 				    			list_nth_child_id = list_id.find('li:eq(' + nth + ')');
@@ -544,33 +569,29 @@
 			hint_keypress_mechanic(add_form, orig_add_wrapper, orig_add_textarea, orig_add_list, orig_add_textarea_plain_id);
 			hint_keypress_mechanic(add_form, cover_add_wrapper, cover_add_textarea, cover_add_list, cover_add_textarea_plain_id);
 
-			// This set of actions coordinates the hiding and showing of 
-			// the icons in the navigation bar.  This should be functionalized
-			// and properly namespaced.
 
-			$('#add_display').click(function() {
-				$('#add_div').css({'display':'block','height': '270px'});
-				$('.display_button').css({'display': 'none'});
-				if (window.window_var.width() > 800) {
-					$('#hamburger').css({'height':'170px', 'display':'block'});
-				}
-				else {
-					$('#hamburger').css({'height':'40px', 'display':'block'});
-					$('#navigation_panel .appearing_div').css({'margin': '0 0 0 ' + String($('#navigation_panel').width()/2 - $('#add_orig').width()/2)});
-				}
-			});
 
-			$('#search_display').click(function() {
-				$('#search_div').css({'display':'block','height': '170px'});
-				$('.display_button').css('display', 'none');
-				if (window.window_var.width() > 800) {
-					$('#hamburger').css({'height':'170px', 'display':'block'});
-				}
-				else {
-					$('#hamburger').css({'height':'40px', 'display':'block'});
-					$('#navigation_panel .appearing_div').css({'margin': '0 0 0 ' + String($('#navigation_panel').width()/2 - $('#add_orig').width()/2)});
-				}
-			});
+
+
+
+			////////////// SHOW AND HIDE NAVIGATION BUTTONS ///////////////
+
+			function display_click_mechanic(clicked, sub_div) {
+				clicked.click(function() {
+					sub_div.css({'display':'block','height': '270px'});
+					$('.display_button').css({'display': 'none'});
+					if (window.window_var.width() > 800) {
+						$('#hamburger').css({'height':'170px', 'display':'block'});
+					}
+					else {
+						$('#hamburger').css({'height':'40px', 'display':'block'});
+						$('#navigation_panel .appearing_div').css({'margin': '0 0 0 ' + String($('#navigation_panel').width()/2 - $('#add_orig').width()/2)});
+					}
+				});
+			}
+
+			display_click_mechanic($('#add_display'), $('#add_div'));
+			display_click_mechanic($('#search_display'), $('#search_div'));
 
 			$('#hamburger').click(function() {
 				$('#add_div').css({'height':'0px'});
@@ -579,23 +600,15 @@
 				$('#hamburger').css({'height':'0px', 'display':'none'});
 			});
 
-			//This fades out the message passed in response to user actions.
-
-			setTimeout(function() {
-				$('#message_wrapper').fadeOut(2000)
-			}, 3000);
 
 
-			$("li").live({
-				mouseenter:
-					function() {
-						$('li').css({'background-color': 'white'});
-						$(this).css({'background-color': '#ddd'});
-						nth = $(this).index();
-					},
-				});
 
 
+
+
+
+
+			//////////////// DETERMINE SAME FUNCTIONS FOR ALL VIDEOS RETURNED FROM DATABSE //////////
 			{% for vid in vids %}
 
 			function vid_mouseover{{ loop.index }}() {
@@ -669,11 +682,13 @@
 			})
 
 
+			// CAN COMBINE THESE TWO?
 			function tag_enter_submit(index) {
 				$('#tag_form' + String(index)).submit(function() {
 					var tag_url = $('#tag_url' + String(index)).text();
 					var tag_orig_tags = $('#orig_tags' + String(index)).val();
 					var tag_cover_tags = $('#cover_tags' + String(index)).val();
+					$('#tag_form' + String(index)).html('<img class="loading_spinner" src="/stylesheets/images/loader.gif">');
 					$.ajax({
 						url: '/tag', 
 						type: 'POST',
@@ -684,11 +699,19 @@
 						}
 					}).done(function(response) {
 						var json = response;
+						$('#tag_form' + String(index)).html('<p class="tag_added_message">Success!</p>');
+						setTimeout(function() {
+							$('#tag_form' + String(index)).fadeOut(2000);
+						}, 1000);
+						setTimeout(function() {
+							$('#tag_div' + String(index)).css({'z-index': '-1'})
+						}, 3000);
 					});
 					return false;
 				})
 			}
 
+			// can take all these functions outside of the loop, so they're not defined over and over
 			function tag_click_submit(index) {
 				$('#tag_button' + String(index)).click(function() {
 					var tag_url = $('#tag_url' + String(index)).text();
@@ -720,7 +743,69 @@
 			tag_enter_submit({{ loop.index }});
 			tag_click_submit({{ loop.index }});
 
+
+
+			//////////// LOGGING CLICKS ON VIDEO ////////////
+
+			//onYouTubePlayerAPIReady
+
+
+			window['floading(index, url)'] = function(index) {
+
+				var current_url = url;
+				var id_index = current_url.lastIndexOf('/');
+				window['player_id' + String(index)] = current_url.slice(id_index + 1);
+
+				window[floaded{{ loop.index }}] = function(index){
+					window['player{{ loop.index }}'] = new YT.Player('vid_id{{ loop.index }}', {
+						videoId: window['player_id{{ loop.index }}'],
+						events: {
+							'onStateChange': function (event) {
+								if (event.data == YT.PlayerState.PLAYING) {
+									console.log('Playing..{{ loop.index }}');
+								}
+								else if (event.data == YT.PlayerState.PAUSED) {
+									console.log('Paused..{{ loop.index }}');
+								}
+								else {
+									console.log('Buffering/Video {{ loop.index }} Ended');
+								}
+							}
+						}
+					});
+				}
+			}
+
+			/*
+
+			var current_url = '{{ vid.url }}';
+			var id_index = current_url.lastIndexOf('/');
+			window['player_id{{ loop.index }}'] = current_url.slice(id_index + 1);
+
+			function floaded{{ loop.index }}(){
+				window['player{{ loop.index }}'] = new YT.Player('vid_id{{ loop.index }}', {
+					videoId: window['player_id{{ loop.index }}'],
+					events: {
+						'onStateChange': function (event) {
+							if (event.data == YT.PlayerState.PLAYING) {
+								console.log('Playing..{{ loop.index }}');
+							}
+							else if (event.data == YT.PlayerState.PAUSED) {
+								console.log('Paused..{{ loop.index }}');
+							}
+							else {
+								console.log('Buffering/Video {{ loop.index }} Ended');
+							}
+						}
+					}
+				});
+			}
+
+			*/
+
+
 			{% endfor %}
+
 
 		</script>
 	</body>

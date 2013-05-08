@@ -111,13 +111,13 @@ def make_embed_url(url):
 	if vid_host == 'www.youtube.com':
 		query = urlparse.parse_qs(url_data.query)
 		vid_id = query["v"][0]
-		embed_url = "http://youtube.com/embed/" + vid_id
+		embed_url = "http://www.youtube.com/embed/" + vid_id
 	elif vid_host == 'vimeo.com':
 		vid_id = url_data.path[1:]
 		embed_url = "http://player.vimeo.com/video/" + vid_id
 	elif vid_host == "youtu.be":
 		vid_id = url_data.path[1:]
-		embed_url = "http://youtube.com/embed/" + vid_id
+		embed_url = "http://www.youtube.com/embed/" + vid_id
 		vid_host = "www.youtube.com"
 	return embed_url, vid_id, vid_host
 
