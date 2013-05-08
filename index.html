@@ -236,7 +236,7 @@
 				\	\	\	<div id="tag_display' + String(loopindex) + '" class="tag_display">\
 				\	\	\	\	<h2>' + tags + '</h2>\
 				\	\	\	</div>\
-				\	\	\	<iframe id="vid_id' + String(loopindex) + '" onload="floaded' + String(loopindex) + '()" class="vid" style="z-index:10;" onmouseover="vid_mouseover' + String(loopindex) + '();" onmouseout="vid_mouseout' + String(loopindex) + '()" width="560" height="315" src="' + url + '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>\
+				\	\	\	<iframe id="vid_id' + String(loopindex) + '" class="vid" style="z-index:10;" onmouseover="vid_mouseover' + String(loopindex) + '();" onmouseout="vid_mouseout' + String(loopindex) + '()" width="560" height="315" src="' + url + '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>\
 				\	\	\	<div class="tag_icon_container" onmouseover="tag_icon_mouseover' + String(loopindex) + '()" onmouseout="tag_icon_mouseout' + String(loopindex) + '()">\
 				\	\	\	\	<h6 id="tag_icon' + String(loopindex) + '" class="tag_icon_text">+</h6>\
 				\	\	\	</div>\
@@ -339,6 +339,44 @@
 	\	\	\	\	hint_keypress_mechanic(tag_form_id, cover_tag_wrapper_id, cover_tag_textarea_id, cover_tag_list_id, cover_tag_textarea_plain_id);\
 	\	\	\	\	tag_enter_submit(" + String(loopindex) + ");\
 	\	\	\	\	tag_click_submit(" + String(loopindex) + ");\
+	\
+	\	\	\	\	setTimeout( function() {\
+	\	\	\	\	\	var current_url = $('#vid_id" + String(loopindex) + "').attr('src');\
+	\	\	\	\	\	var id_index = current_url.lastIndexOf('/');\
+	\	\	\	\	\	window['player_id" + String(loopindex) + "'] = current_url.slice(id_index + 1);\
+	\
+	\	\	\	\	\	window['played" + String(loopindex) + "'] = 0;\
+	\	\	\	\	\	function floaded" + String(loopindex) + "(){\
+	\	\	\	\	\	\	window['player" + String(loopindex) + "'] = new YT.Player('vid_id" + String(loopindex) + "', {\
+	\	\	\	\	\	\	\	videoId: window['player_id" + String(loopindex) + "'],\
+	\	\	\	\	\	\	\	events: {\
+	\	\	\	\	\	\	\	\	'onStateChange': function (event) {\
+	\	\	\	\	\	\	\	\	\	if (event.data == YT.PlayerState.PLAYING && window['played" + String(loopindex) + "'] == 0) {\
+	\	\	\	\	\	\	\	\	\	\	window['played" + String(loopindex) + "'] = 1;\
+	\	\	\	\	\	\	\	\	\	\	\	console.log('Playing.." + String(loopindex) + "');\
+	\	\	\	\	\	\	\	\	\	\	\	\	$.ajax({\
+	\	\	\	\	\	\	\	\	\	\	\	\	\	url: '/upvote',\
+	\	\	\	\	\	\	\	\	\	\	\	\	\	type: 'POST',\
+	\	\	\	\	\	\	\	\	\	\	\	\	\	data: {\
+	\	\	\	\	\	\	\	\	\	\	\	\	\	\	url : current_url,\
+	\	\	\	\	\	\	\	\	\	\	\	\	\	\	quantity : 1\
+	\	\	\	\	\	\	\	\	\	\	\	\	\	}\
+	\	\	\	\	\	\	\	\	\	\	\	\	}).done(function(response) {\
+	\	\	\	\	\	\	\	\	\	\	\	\	\	console.log(response)\
+	\	\	\	\	\	\	\	\	\	\	\	\	});\
+	\	\	\	\	\	\	\	\	\	}\
+	\	\	\	\	\	\	\	\	\	else if (event.data == YT.PlayerState.PAUSED) {\
+	\	\	\	\	\	\	\	\	\	\	console.log('Paused.." + String(loopindex) + "');\
+	\	\	\	\	\	\	\	\	\	}\
+	\	\	\	\	\	\	\	\	\	else {\
+	\	\	\	\	\	\	\	\	\	\	console.log('Buffering/Video " + String(loopindex) + " Ended');\
+	\	\	\	\	\	\	\	\	\	}\
+	\	\	\	\	\	\	\	\	}\
+	\	\	\	\	\	\	\	}\
+	\	\	\	\	\	\	});\
+	\	\	\	\	\	}\
+	\	\	\	\	\	floaded" + String(loopindex) + "();\
+	\	\	\	\	}, 100);\
 	\
 	\
 	\
@@ -606,8 +644,6 @@
 
 
 
-
-
 			//////////////// DETERMINE SAME FUNCTIONS FOR ALL VIDEOS RETURNED FROM DATABSE //////////
 			{% for vid in vids %}
 
@@ -744,40 +780,11 @@
 			tag_click_submit({{ loop.index }});
 
 
-
 			//////////// LOGGING CLICKS ON VIDEO ////////////
 
 			//onYouTubePlayerAPIReady
 
-
-			window['floading(index, url)'] = function(index) {
-
-				var current_url = url;
-				var id_index = current_url.lastIndexOf('/');
-				window['player_id' + String(index)] = current_url.slice(id_index + 1);
-
-				window[floaded{{ loop.index }}] = function(index){
-					window['player{{ loop.index }}'] = new YT.Player('vid_id{{ loop.index }}', {
-						videoId: window['player_id{{ loop.index }}'],
-						events: {
-							'onStateChange': function (event) {
-								if (event.data == YT.PlayerState.PLAYING) {
-									console.log('Playing..{{ loop.index }}');
-								}
-								else if (event.data == YT.PlayerState.PAUSED) {
-									console.log('Paused..{{ loop.index }}');
-								}
-								else {
-									console.log('Buffering/Video {{ loop.index }} Ended');
-								}
-							}
-						}
-					});
-				}
-			}
-
-			/*
-
+			window['played{{ loop.index }}'] = 0;
 			var current_url = '{{ vid.url }}';
 			var id_index = current_url.lastIndexOf('/');
 			window['player_id{{ loop.index }}'] = current_url.slice(id_index + 1);
@@ -787,8 +794,19 @@
 					videoId: window['player_id{{ loop.index }}'],
 					events: {
 						'onStateChange': function (event) {
-							if (event.data == YT.PlayerState.PLAYING) {
+							if (event.data == YT.PlayerState.PLAYING && window['played{{ loop.index }}'] == 0) {
+								window['played{{ loop.index }}'] = 1;
 								console.log('Playing..{{ loop.index }}');
+									$.ajax({
+										url: '/upvote', 
+										type: 'POST',
+										data: {
+											url : '{{ vid.url }}',
+											quantity : 1
+										}
+									}).done(function(response) {
+										console.log(response)
+									});
 							}
 							else if (event.data == YT.PlayerState.PAUSED) {
 								console.log('Paused..{{ loop.index }}');
@@ -801,11 +819,7 @@
 				});
 			}
 
-			*/
-
-
 			{% endfor %}
-
 
 		</script>
 	</body>

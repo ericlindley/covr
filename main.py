@@ -296,6 +296,19 @@ class ScrollHandler(webapp2.RequestHandler):
 		response = json.dumps(vid_data, separators=(',',':'))
 		self.response.write(response)
 
+class UpvoteHandler(webapp2.RequestHandler):
+	def post(self):
+		## SECURITY / EFFICIENCY / ERRORHANDLING / TIMEOUT ETC CONSIDERATIONS
+		## IN DICTIONARY FORM, SO CAN FILTER OUT EMPTY BITS?
+		url = self.request.get('url')
+		quantity = self.request.get('quantity')
+
+		vid = Vid.all().filter('url =', url).fetch(1)[0]
+		vid.rank += int(quantity)
+		vid.put()
+		
+		self.response.write("Success!")
+
 
 ## use filtering algorithm that depends on users to find videos and interact with them
 ## as the basis of their worth and the worth of the keywords used to find them.
@@ -306,4 +319,5 @@ app = webapp2.WSGIApplication([
 								('/hint', HintHandler),
 								('/scroll', ScrollHandler),
 								('/tag', TagHandler),
+								('/upvote', UpvoteHandler),
 													], debug=True)
