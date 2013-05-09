@@ -1,11 +1,5 @@
 indexes:
 
-- kind: Tagmap
-  properties:
-  - name: name
-  - name: rank
-    direction: desc
-
 - kind: Vid
   properties:
   - name: name

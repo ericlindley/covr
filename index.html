@@ -11,7 +11,7 @@
 		<div id="black_panel">
 		</div>
 		<div id="navigation_panel">
-			<h1 id="title">NCOVR</h1>
+			<h1 id="title"><a href="/">NCOVR</a></h1>
 			<hr />
 			<!-- ((((((((((((((((((((((((((((((((( SEARCH REGION ))))))))))))))))))))))))))))))))) -->
 			<div id="navigation_container">
@@ -100,12 +100,12 @@
 							<form class="tag_form tag_div" id="tag_form{{ loop.index }}">
 								<textarea id="tag_url{{ loop.index }}" class="hidden" name="url" rows="1" cols="20" >{{vid.url}}</textarea>
 								<div id="orig_tag_wrapper{{ loop.index }}" class="suggestion_box">
-									<textarea id="orig_tags{{ loop.index }}" name="orig_tags" rows="1" cols="50" placeholder="Tags for Original Song (ex. John Cale, Paris 1919)"></textarea>
+									<textarea id="orig_tags{{ loop.index }}" name="orig_tags" rows="1" maxlength="60" placeholder="Tags for Original Song"></textarea>
 									<ul id="orig_tag_list{{ loop.index }}" class="auto-list add_auto-list">
 									</ul>
 								</div>
 								<div id="cover_tag_wrapper{{ loop.index }}" class="suggestion_box">
-									<textarea id="cover_tags{{ loop.index }}" name="cover_tags" rows="1" cols="50" placeholder="Tags for Cover Song (ex. Owen Pallett, Live)"></textarea>
+									<textarea id="cover_tags{{ loop.index }}" name="cover_tags" rows="1" maxlength="60" placeholder="Tags for Cover Song"></textarea>
 									<ul id="cover_tag_list{{ loop.index }}" class="auto-list add_auto-list">
 									</ul>
 								</div>
@@ -121,6 +121,9 @@
 			</div>
 			<div class="vid" id="end">
 				<hr />
+				<div id="end_spinner">
+					<img class="loading_spinner" src="/stylesheets/images/loader.gif">
+				</div>
 			<div>
 		</div>
 		<!-- ((((((((((((((((((((((((((((((((( END DISPLAY AREA ))))))))))))))))))))))))))))))))) -->
@@ -214,6 +217,7 @@
 
 				if (window.window_var.scrollTop() + window.window_var.height() > window.end_var.offset().top + window.end_var.height()/2 && window.ajax == 0) {
 					window.ajax = 1;
+					$('#end_spinner').css({'z-index': '5'});
 					$.ajax({
 						url: '/scroll', 
 						type: 'POST',
@@ -222,6 +226,7 @@
 							offset: window.offset
 						}
 					}).done(function(response) {
+						$('#end_spinner').css({'z-index': '-1'});
 						var json = response;
 						var obj = JSON && JSON.parse(json) || $.parseJSON(json);
 						var insertion = '';
@@ -260,11 +265,11 @@
 				\	\	\	\	\	<form class="tag_form tag_div" id="tag_form' + String(loopindex) + '">\
 				\	\	\	\	\	\	<textarea id="tag_url' + String(loopindex) + '" class="hidden" name="url" rows="1" cols="20" >' + url + '</textarea>\
 				\	\	\	\	\	\	<div id="orig_tag_wrapper' + String(loopindex) + '" class="suggestion_box">\
-				\	\	\	\	\	\	\	<textarea id="orig_tags' + String(loopindex) + '" name="orig_tags" rows="1" cols="50" placeholder="Tags for Original Song (ex. John Cale, Paris 1919)"></textarea>\
+				\	\	\	\	\	\	\	<textarea id="orig_tags' + String(loopindex) + '" name="orig_tags" rows="1" cols="50" maxlength="60" placeholder="Tags for Original Song"></textarea>\
 				\	\	\	\	\	\	\	<ul id="orig_tag_list' + String(loopindex) + '" class="auto-list add_auto-list"></ul>\
 				\	\	\	\	\	\	</div>\
 				\	\	\	\	\	\	<div id="cover_tag_wrapper' + String(loopindex) + '" class="suggestion_box">\
-				\	\	\	\	\	\	\	<textarea id="cover_tags' + String(loopindex) + '" name="cover_tags" rows="1" cols="50" placeholder="Tags for Cover Song (ex. Owen Pallett, Live)"></textarea>\
+				\	\	\	\	\	\	\	<textarea id="cover_tags' + String(loopindex) + '" name="cover_tags" rows="1" cols="50" maxlength="60" placeholder="Tags for Cover Song"></textarea>\
 				\	\	\	\	\	\	\	<ul id="cover_tag_list' + String(loopindex) + '" class="auto-list add_auto-list"></ul>\
 				\	\	\	\	\	\	</div>\
 				\	\	\	\	\	\	<input id="tag_button' + String(loopindex) + '" class="submit_button tag_button" type="submit" value="Add These Tags">\
@@ -791,7 +796,10 @@
 						}
 					}).done(function(response) {
 						var json = response;
-						$('#tag_form' + String(index)).html('<p class="tag_added_message">Success!</p>');
+						$('#tag_form' + String(index)).html('<p class="tag_added_message">' + response + '</p>');
+						if (response == 'Success!') {
+							$('#tag_display' + String(index) + ' h2').before('<h2>Your Tags: ' + tag_orig_tags + ', ' + tag_cover_tags + '</h2>');
+						}
 						setTimeout(function() {
 							$('#tag_form' + String(index)).fadeOut(2000);
 						}, 1000);
@@ -820,7 +828,10 @@
 						}
 					}).done(function(response) {
 						var json = response;
-						$('#tag_form' + String(index)).html('<p class="tag_added_message">Success!</p>');
+						$('#tag_form' + String(index)).html('<p class="tag_added_message">' + response + '</p>');
+						if (response == 'Success!') {
+							$('#tag_display' + String(index) + ' h2').before('<h2>Your Tags: ' + tag_orig_tags + ', ' + tag_cover_tags + '</h2>');
+						}
 						setTimeout(function() {
 							$('#tag_form' + String(index)).fadeOut(2000);
 						}, 1000);

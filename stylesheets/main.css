@@ -8,7 +8,7 @@ body {
 
 a {
 	text-decoration: none;
-	color: white;
+	color: black;
 }
 
 button {
@@ -295,6 +295,7 @@ ul.auto-list > li {
 }
 
 #end {
+	position:relative;
 	background-color: black;
 }
 
@@ -306,6 +307,14 @@ ul.auto-list > li {
 
 #end hr:after {
 	background: black;
+}
+
+#end div {
+	position: relative;
+	width: 32px;
+	margin: auto;
+	top: -60;
+	z-index: -1;
 }
 
 #hamburger {

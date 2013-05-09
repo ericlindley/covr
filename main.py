@@ -106,20 +106,28 @@ def no_dupes(seq):
 # Helper function to take a youtube or vimeo link and turn it into
 # the proper embed link
 def make_embed_url(url):
-	url_data = urlparse.urlparse(url)
-	vid_host = url_data.hostname
-	if vid_host == 'www.youtube.com':
-		query = urlparse.parse_qs(url_data.query)
-		vid_id = query["v"][0]
-		embed_url = "http://www.youtube.com/embed/" + vid_id
-	elif vid_host == 'vimeo.com':
-		vid_id = url_data.path[1:]
-		embed_url = "http://player.vimeo.com/video/" + vid_id
-	elif vid_host == "youtu.be":
-		vid_id = url_data.path[1:]
-		embed_url = "http://www.youtube.com/embed/" + vid_id
-		vid_host = "www.youtube.com"
-	return embed_url, vid_id, vid_host
+	try:
+		url_data = urlparse.urlparse(url)
+		vid_host = url_data.hostname
+		if vid_host == 'www.youtube.com' or vid_host == 'youtube.com':
+			query = urlparse.parse_qs(url_data.query)
+			try:
+				vid_id = query["v"][0]
+			except:
+				return [1]
+			embed_url = "http://www.youtube.com/embed/" + vid_id
+		elif vid_host == 'vimeo.com':
+			vid_id = url_data.path[1:]
+			embed_url = "http://player.vimeo.com/video/" + vid_id
+		elif vid_host == "youtu.be":
+			vid_id = url_data.path[1:]
+			embed_url = "http://www.youtube.com/embed/" + vid_id
+			vid_host = "www.youtube.com"
+		else:
+			return [2]
+		return embed_url, vid_id, vid_host
+	except:
+		return [0]
 
 # Helper function to instantiate tag and tagmap, given a new
 # video for the database.
@@ -159,6 +167,8 @@ class MainHandler(webapp2.RequestHandler):
 		orig_search = clean_tags(self.request.get('orig_search'))
 		cover_search = clean_tags(self.request.get('cover_search'))
 		from_add = clean_tags(self.request.get('m'))
+		if from_add:
+			from_add = from_add[0]
 		### VALIDATE TERMS - LIMIT LENGTH
 		## SECURITY / EFFICIENCY / ERRORHANDLING / TIMEOUT ETC CONSIDERATIONS
 
@@ -173,11 +183,11 @@ class MainHandler(webapp2.RequestHandler):
 					query += ".filter('tags =', '" + term + "')"
 					vids = eval(query + ".fetch(6)")
 			if vids:
-				message = """We got some vids for you,
-								</h2><h2>based on your rad query!"""
+				message = """Here are some songs for you,
+							</h2><h2>based on your rad query!"""
 			else:
-				message = """Yo, we couldn't find any based on your search, 
-								</h2><h2>but here are some consolation vids:"""
+				message = """So.... we couldn't find anything based on your search, 
+							</h2><h2>but here are some consolation songs:"""
 				vids = Vid.all().order("-rank").fetch(6)
 		
 		else:
@@ -185,8 +195,30 @@ class MainHandler(webapp2.RequestHandler):
 							</h2><h2>Here are our most popular:"""
 			vids = Vid.all().order("-rank").fetch(6)
 
-		if from_add:
-			message = """Your cover has been added!"""
+		if from_add == 'add':
+			message = "Your cover has been added. Thanks for contributing!"
+
+		elif from_add == 'urlfail':
+			message = """Something went wrong, and your video was not added.
+						</h2><h2>Please include http:// or https// in your URL.
+						</h2><h2>Thanks!"""
+
+		elif from_add == 'tagfail':
+			message = """Something went wrong, and your video was not added.
+						</h2><h2>Make your tags not insane&mdash;Thanks!"""
+
+		elif from_add == 'hostfail':
+			message = """Something went wrong, and your video was not added.
+						</h2><h2>Use Youtube or Vimeo!! Thanks!"""
+
+		elif from_add == 'activefail':
+			message = """Something went wrong, and your video was not added.
+						</h2><h2>Make sure your video is still active. Thanks!"""
+
+		elif from_add == 'catchfail':
+			message = """Something went wrong, and your video was not added.
+						</h2><h2>Catchall!
+						</h2><h2>Thanks!"""
 
 		############ Clean Up Tags #######################
 		tag_string_list = []
@@ -213,20 +245,74 @@ class AddHandler(webapp2.RequestHandler):
 	def post(self):
 		## SECURITY / EFFICIENCY / ERRORHANDLING / TIMEOUT ETC CONSIDERATIONS
 		url = self.request.get('url')
-		vid_check = urlfetch.Fetch(url).status_code
+
+		try:
+			vid_check = urlfetch.Fetch(url).status_code
+		except:
+			vid_check = 600
 		if vid_check < 400:
 			vid = Vid()
-			vid.url = make_embed_url(url)[0]
-			orig_tags = split_tags(clean_tags(self.request.get('orig_tags')))
-			cover_tags = split_tags(clean_tags(self.request.get('cover_tags')))
-			all_tags = [tag+"_o" for tag in orig_tags] + [tag+"_c" for tag in cover_tags]
-			vid.tags = all_tags
-			vid.rank = 0
-			vid.author = users.get_current_user().nickname()
-			vid.put()
-			if all_tags:
-				create_tagmap(vid, all_tags)
-		self.redirect('/?m=add')
+			vid_url = make_embed_url(url)[0]
+			if vid_url == 0:
+				##logging.info('mystery 1')
+				self.redirect('/?m=catchfail')
+			elif vid_url == 1:
+				## youtube but invalid after
+				self.redirect('/?m=activefail')
+			elif vid_url == 2:
+				## Wrong Host (.com included or not, even)
+				self.redirect('/?m=hostfail')
+			else:
+				vid.url = vid_url
+				orig_tags = split_tags(clean_tags(self.request.get('orig_tags')))
+				cover_tags = split_tags(clean_tags(self.request.get('cover_tags')))
+				all_tags = [tag+"_o" for tag in orig_tags] + [tag+"_c" for tag in cover_tags]
+				
+				try:
+					existing_vid = Vid.all().filter('url =', vid.url).fetch(1)[0]
+
+					if existing_vid:
+						vid = existing_vid
+						old_tags = vid.tags
+						new_tags = ([tag for tag in all_tags if tag not in old_tags])
+						vid.tags += new_tags
+						vid.put()
+						# if there are any new tags, make a new tagmap for them.
+						if new_tags:
+							create_tagmap(vid, new_tags)
+
+					else:
+						vid.tags = all_tags
+						vid.rank = 0
+						vid.author = users.get_current_user().nickname()
+						vid.put()
+						if all_tags:
+							create_tagmap(vid, all_tags)
+				except:
+					vid.tags = all_tags
+					vid.rank = 0
+					vid.author = users.get_current_user().nickname()
+					vid.put()
+					if all_tags:
+						create_tagmap(vid, all_tags)
+				
+				self.redirect('/?m=add')
+		elif vid_check >= 500:
+			## String entered rather than url
+			self.redirect('/?m=urlfail')
+		else:
+			vid_url = make_embed_url(url)[0]
+			if vid_url == 0:
+				## Not sure about this one
+				##logging.info('mystery 2')
+				self.redirect('/?m=catchfail')
+			elif vid_url == 1 or vid_url == 2 or type(vid_url) != type((3,4)):
+				## youtube server, but video code is inactive or taken down or bogus
+				self.redirect('/?m=activefail')
+			else:
+				## Not sure about this one
+				##logging.info('mystery 3')
+				self.redirect('/?m=catchfail')
 
 		##  eventually just make an ajax call that returns "success" or not.
 		## potential problem: what if users try to upload the same video mul-
