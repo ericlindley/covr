@@ -156,12 +156,14 @@ class MainHandler(webapp2.RequestHandler):
 	def get(self):
 		############# Login Requirements ################
 		# Uses google login functionality to get the user.
-		current_user = users.get_current_user()
+		########current_user = users.get_current_user()
 		# Make sure someone is logged in and an admin to
 		# see this page.
-		if (current_user and 
-			(current_user.email() == 'eric.lindley@gmail.com')) != True:
-			self.redirect(users.create_login_url(self.request.uri))
+		########if (current_user and 
+		########	(current_user.email() == 'eric.lindley@gmail.com' or 
+		########	current_user.email() == 'jonlesser@gmail.com' or
+		########	current_user.email() == 'mat.a.brown@gmail.com')) != True:
+		########	self.redirect(users.create_login_url(self.request.uri))
 
 		############## Get Search Terms ################
 		orig_search = clean_tags(self.request.get('orig_search'))
@@ -173,6 +175,8 @@ class MainHandler(webapp2.RequestHandler):
 		## SECURITY / EFFICIENCY / ERRORHANDLING / TIMEOUT ETC CONSIDERATIONS
 
 		################ Query Database ##################
+		search_error = 0
+
 		query = "Vid.all().order('-rank')"
 
 		if orig_search or cover_search:
@@ -180,18 +184,25 @@ class MainHandler(webapp2.RequestHandler):
 						tag + "_c" for tag in cover_search]
 			if search:
 				for term in search:
-					query += ".filter('tags =', '" + term + "')"
-					vids = eval(query + ".fetch(6)")
-			if vids:
+					try:
+						query += ".filter('tags =', '" + term + "')"
+						vids = eval(query + ".fetch(6)")
+					except:
+						search_error = 1
+						vids = Vid.all().order("-rank").fetch(6)
+						message = """Something went wrong with your search!
+									</h2><h2>Take out weird characters (like ", ', etc.)
+									</h2><h2>Thanks!"""
+			if vids and search_error == 0:
 				message = """Here are some songs for you,
 							</h2><h2>based on your rad query!"""
-			else:
+			elif search_error == 0:
 				message = """So.... we couldn't find anything based on your search, 
 							</h2><h2>but here are some consolation songs:"""
 				vids = Vid.all().order("-rank").fetch(6)
 		
 		else:
-			message = """Enter search terms to find Httt vids!
+			message = """Use the search icon to find some songs!
 							</h2><h2>Here are our most popular:"""
 			vids = Vid.all().order("-rank").fetch(6)
 
@@ -284,14 +295,20 @@ class AddHandler(webapp2.RequestHandler):
 					else:
 						vid.tags = all_tags
 						vid.rank = 0
-						vid.author = users.get_current_user().nickname()
+						try:
+							vid.author = users.get_current_user().nickname()
+						except:
+							pass
 						vid.put()
 						if all_tags:
 							create_tagmap(vid, all_tags)
 				except:
 					vid.tags = all_tags
 					vid.rank = 0
-					vid.author = users.get_current_user().nickname()
+					try:
+						vid.author = users.get_current_user().nickname()
+					except:
+						pass
 					vid.put()
 					if all_tags:
 						create_tagmap(vid, all_tags)
@@ -368,18 +385,22 @@ class ScrollHandler(webapp2.RequestHandler):
 		query = self.request.get('query')
 		offset = int(self.request.get('offset'))
 
-		new_vids = eval(query + '.fetch(limit = 6, offset = offset)')
-		vid_data = {}
+		try:
+			new_vids = eval(query + '.fetch(limit = 6, offset = offset)')
+			vid_data = {}
 
-		for i, vid in enumerate(new_vids):
-			tag_string = ""
-			for tag in reversed(sorted(vid.tags, key=len)):
-				if tag[:-2] not in tag_string:
-					tag_string += tag[:-2] + " "
+			for i, vid in enumerate(new_vids):
+				tag_string = ""
+				for tag in reversed(sorted(vid.tags, key=len)):
+					if tag[:-2] not in tag_string:
+						tag_string += tag[:-2] + " "
 
-			vid_data[i] = [vid.url, tag_string]
+				vid_data[i] = [vid.url, tag_string]
 
-		response = json.dumps(vid_data, separators=(',',':'))
+			response = json.dumps(vid_data, separators=(',',':'))
+
+		except:
+			response = 0
 		self.response.write(response)
 
 class UpvoteHandler(webapp2.RequestHandler):

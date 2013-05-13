@@ -317,6 +317,27 @@ ul.auto-list > li {
 	z-index: -1;
 }
 
+#faq {
+	display:none;
+	padding: 10px;
+	max-width: 35em;
+}
+
+#faq h1, #faq p {
+	color: #ddd;
+}
+
+#faq_close {
+	border: 2px solid white;
+	padding: 5px;
+	cursor: pointer;
+}
+
+#faq_highlight {
+	color: #fff;
+	font-weight: bold;
+}
+
 #hamburger {
 	display: none;
 }
@@ -369,13 +390,20 @@ ul.auto-list > li {
 		display:none;
 	}
 
-	#add_display {
+	#add_display, #quest_display {
 		width: 40px;
 		height: 40px;
 		font-size: 27px;
 		position: fixed;
 		top: 5;
+	}
+
+	#add_display {
 		left: 55;
+	}
+
+	#quest_display {
+		right: 5;
 	}
 
 	#display_case {
